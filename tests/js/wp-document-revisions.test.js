@@ -919,15 +919,9 @@ describe('WPDocumentRevisions', () => {
 	});
 
 	describe('legacyPostDocumentUpload', () => {
-		test('should extract attachmentID and extension from CustomEvent detail', () => {
+		test('should pass extension as file and attachmentID as attachmentID', () => {
 			WPDocumentRevisions.hasUpload = false;
-			WPDocumentRevisions.window = {
-				document: {
-					getElementById: jest.fn(() => ({ value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() })),
-				},
-				tb_remove: jest.fn(),
-			};
-			WPDocumentRevisions.enableSubmit = jest.fn();
+			WPDocumentRevisions.postDocumentUpload = jest.fn();
 
 			const event = new CustomEvent('documentUpload', {
 				detail: { attachmentID: '789', extension: '.pdf' },
@@ -935,7 +929,8 @@ describe('WPDocumentRevisions', () => {
 
 			WPDocumentRevisions.legacyPostDocumentUpload(event);
 
-			expect(WPDocumentRevisions.hasUpload).toBe(true);
+			// extension maps to file (1st arg), attachmentID maps to attachmentID (2nd arg)
+			expect(WPDocumentRevisions.postDocumentUpload).toHaveBeenCalledWith('.pdf', '789');
 		});
 
 		test('should handle event without detail gracefully', () => {

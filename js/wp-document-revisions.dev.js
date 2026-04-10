@@ -175,7 +175,7 @@
 		legacyPostDocumentUpload = (e) => {
 			const attachmentID = e && e.detail ? e.detail.attachmentID : undefined;
 			const extension = e && e.detail ? e.detail.extension : undefined;
-			return this.postDocumentUpload(attachmentID, extension);
+			return this.postDocumentUpload(extension, attachmentID);
 		};
 
 		human_time_diff = (from, to) => {
