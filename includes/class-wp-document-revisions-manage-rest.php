@@ -49,6 +49,11 @@ class WP_Document_Revisions_Manage_Rest {
 		add_filter( 'rest_prepare_document', array( &$this, 'doc_clean_document' ), 10, 3 );
 		add_filter( 'rest_prepare_revision', array( &$this, 'doc_clean_revision' ), 10, 3 );
 		add_filter( 'rest_prepare_attachment', array( &$this, 'doc_clean_attachment' ), 10, 3 );
+
+		// Block editor content/meta sync.
+		if ( apply_filters( 'document_use_block_editor', false ) ) {
+			add_filter( 'rest_pre_insert_document', array( &$this, 'sync_meta_to_content' ), 10, 2 );
+		}
 	}
 
 	/**
@@ -152,7 +157,7 @@ class WP_Document_Revisions_Manage_Rest {
 	 * @param WP_Post          $post     Post object.
 	 * @param WP_REST_Request  $request  Request object.
 	 */
-	public function doc_clean_document( WP_REST_Response $response, WP_Post $post, WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public function doc_clean_document( WP_REST_Response $response, WP_Post $post, WP_REST_Request $request ) {
 		// is it a document.
 		if ( 'document' !== get_post_type( $post->ID ) ) {
 			return $response;
@@ -167,6 +172,24 @@ class WP_Document_Revisions_Manage_Rest {
 		// Possibly remove attachment.
 		if ( ! current_user_can( 'edit_document', $post->ID ) ) {
 			$response->remove_link( 'https://api.w.org/attachment' );
+		}
+
+		// Block editor: sync meta from content and strip WPDR comment from raw content.
+		if ( apply_filters( 'document_use_block_editor', false ) && 'edit' === $request['context'] ) {
+			$attach_id = $this->populate_attachment_meta( $post );
+			$data      = $response->get_data();
+
+			// Update meta in response if we populated it from content.
+			if ( $attach_id && isset( $data['meta'] ) ) {
+				$data['meta']['document_attachment_id'] = $attach_id;
+			}
+
+			// Strip WPDR comment so block editor only sees description content.
+			if ( isset( $data['content']['raw'] ) ) {
+				$data['content']['raw'] = preg_replace( '/<!-- WPDR \s*\d+ -->/', '', $data['content']['raw'] );
+			}
+
+			$response->set_data( $data );
 		}
 
 		return $response;
@@ -260,5 +283,60 @@ class WP_Document_Revisions_Manage_Rest {
 		}
 
 		return $response;
+	}
+
+
+	/**
+	 * Populates the document_attachment_id meta from post_content if empty.
+	 *
+	 * @since 3.9.1
+	 * @param WP_Post $post Post object.
+	 * @return int|false The attachment ID, or false if none found.
+	 */
+	private function populate_attachment_meta( WP_Post $post ) {
+		$meta = absint( get_post_meta( $post->ID, 'document_attachment_id', true ) );
+		if ( $meta ) {
+			return $meta;
+		}
+
+		$wpdr      = self::$parent;
+		$attach_id = $wpdr->extract_document_id( $post->post_content );
+		if ( $attach_id ) {
+			update_post_meta( $post->ID, 'document_attachment_id', $attach_id );
+			return $attach_id;
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * Prepends the WPDR comment to post_content on REST save using the attachment meta.
+	 *
+	 * @since 3.9.1
+	 * @param stdClass        $prepared_post An object representing a single post prepared for inserting or updating the database.
+	 * @param WP_REST_Request $request       Request object.
+	 * @return stdClass Modified post object.
+	 */
+	public function sync_meta_to_content( $prepared_post, WP_REST_Request $request ) {
+		// Get attachment ID: prefer request meta, fall back to DB.
+		$attach_id = 0;
+		$meta      = $request->get_param( 'meta' );
+		if ( isset( $meta['document_attachment_id'] ) ) {
+			$attach_id = absint( $meta['document_attachment_id'] );
+		} elseif ( ! empty( $prepared_post->ID ) ) {
+			$attach_id = absint( get_post_meta( $prepared_post->ID, 'document_attachment_id', true ) );
+		}
+
+		if ( $attach_id ) {
+			$wpdr    = self::$parent;
+			$content = isset( $prepared_post->post_content ) ? $prepared_post->post_content : '';
+			// Strip any existing WPDR comment to avoid duplicates.
+			$content = preg_replace( '/<!-- WPDR \s*\d+ -->/', '', $content );
+			// Prepend the WPDR comment.
+			$prepared_post->post_content = $wpdr->format_doc_id( $attach_id ) . $content;
+		}
+
+		return $prepared_post;
 	}
 }
