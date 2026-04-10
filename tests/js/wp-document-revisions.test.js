@@ -917,4 +917,57 @@ describe('WPDocumentRevisions', () => {
 			expect(window.location.reload).not.toHaveBeenCalled();
 		});
 	});
+
+	describe('legacyPostDocumentUpload', () => {
+		test('should extract attachmentID and extension from CustomEvent detail', () => {
+			WPDocumentRevisions.hasUpload = false;
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn(() => ({ value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() })),
+				},
+				tb_remove: jest.fn(),
+			};
+			WPDocumentRevisions.enableSubmit = jest.fn();
+
+			const event = new CustomEvent('documentUpload', {
+				detail: { attachmentID: '789', extension: '.pdf' },
+			});
+
+			WPDocumentRevisions.legacyPostDocumentUpload(event);
+
+			expect(WPDocumentRevisions.hasUpload).toBe(true);
+		});
+
+		test('should handle event without detail gracefully', () => {
+			WPDocumentRevisions.hasUpload = false;
+			WPDocumentRevisions.postDocumentUpload = jest.fn();
+
+			const event = new Event('documentUpload');
+			WPDocumentRevisions.legacyPostDocumentUpload(event);
+
+			expect(WPDocumentRevisions.postDocumentUpload).toHaveBeenCalledWith(undefined, undefined);
+		});
+
+		test('should preserve this binding when used as event listener', () => {
+			WPDocumentRevisions.hasUpload = false;
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn(() => ({ value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() })),
+				},
+				tb_remove: jest.fn(),
+			};
+			WPDocumentRevisions.enableSubmit = jest.fn();
+
+			const event = new CustomEvent('documentUpload', {
+				detail: { attachmentID: '123', extension: '.docx' },
+			});
+
+			// Simulate addEventListener callback (this would be document, not instance)
+			const handler = WPDocumentRevisions.legacyPostDocumentUpload;
+			handler.call(document, event);
+
+			// Should still work because arrow functions ignore call/apply this
+			expect(WPDocumentRevisions.hasUpload).toBe(true);
+		});
+	});
 });

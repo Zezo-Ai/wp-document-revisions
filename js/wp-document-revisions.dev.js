@@ -134,13 +134,13 @@
 				});
 		};
 
-		requestPermission() {
+		requestPermission = () => {
 			if (window.webkitNotifications != null) {
 				return window.webkitNotifications.requestPermission();
 			}
 		}
 
-		lockOverrideNotice(notice) {
+		lockOverrideNotice = (notice) => {
 			if (window.webkitNotifications.checkPermission() > 0) {
 				return window.webkitNotifications.RequestPermission(lock_override_notice);
 			} else {
@@ -172,11 +172,13 @@
 			}
 		};
 
-		legacyPostDocumentUpload(attachmentID, extension) {
+		legacyPostDocumentUpload = (e) => {
+			const attachmentID = e && e.detail ? e.detail.attachmentID : undefined;
+			const extension = e && e.detail ? e.detail.extension : undefined;
 			return this.postDocumentUpload(attachmentID, extension);
-		}
+		};
 
-		human_time_diff(from, to) {
+		human_time_diff = (from, to) => {
 			const d = new Date();
 			to = to || d.getTime() / 1000 + parseInt(wp_document_revisions.offset);
 			const diff = Math.abs(to - from);
@@ -204,14 +206,14 @@
 			}
 		}
 
-		roundUp(n) {
+		roundUp = (n) => {
 			if (n < 1) {
 				n = 1;
 			}
 			return n;
 		}
 
-		bindPostDocumentUploadCB() {
+		bindPostDocumentUploadCB = () => {
 			if (typeof uploader === 'undefined' || uploader === null) {
 				return;
 			}
@@ -244,7 +246,7 @@
 			});
 		};
 
-		getDescr() {
+		getDescr = () => {
 			// Extract data from TinyMCE window and clean up text.
 			// On starting, the post_content is set to BOTH fields content and post_content.
 			const iframe = this.window.document.getElementById('content_ifr');
@@ -308,7 +310,7 @@
 			}
 		};
 
-		postDocumentUpload(file, attachmentID) {
+		postDocumentUpload = (file, attachmentID) => {
 			if (typeof attachmentID === 'string' && attachmentID.indexOf('error') !== -1) {
 				const mediaItem = document.querySelector('.media-item');
 				if (mediaItem) {
