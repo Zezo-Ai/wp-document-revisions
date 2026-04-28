@@ -262,7 +262,7 @@ jobs:
               run: npm install
 
             - name: Build blocks
-              run: npm run build:blocks
+              run: npm run build:blocks && npm run build:editor
 
             - name: Get Playwright version
               id: playwright-version

@@ -39,7 +39,7 @@ jobs:
       - name: Install Node.js dependencies and build blocks
         run: |
           npm install
-          npm run build:blocks
+          npm run build
         timeout-minutes: 5
 
       - name: Verify tool installation
