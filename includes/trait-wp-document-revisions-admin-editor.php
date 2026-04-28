@@ -463,6 +463,17 @@ trait WP_Document_Revisions_Admin_Editor {
 					) . ';',
 					'before'
 				);
+
+				// Hide the main editor canvas — documents are managed via the sidebar panels.
+				wp_add_inline_style(
+					'wp-edit-post',
+					'.post-type-document .editor-visual-editor,
+					.post-type-document .edit-post-visual-editor,
+					.post-type-document .editor-text-editor,
+					.post-type-document .edit-post-text-editor {
+						display: none !important;
+					}'
+				);
 			}
 		} else {
 			// Classic editor: enqueue the existing admin JS with localized strings.
