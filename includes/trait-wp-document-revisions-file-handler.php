@@ -171,9 +171,9 @@ trait WP_Document_Revisions_File_Handler {
 		$filename .= ( '' === $version ) ? '' : __( '-revision-', 'wp-document-revisions' ) . $version;
 
 		// we want the true attachment URL, not the permalink, so temporarily remove our filter.
-		remove_filter( 'wp_get_attachment_url', array( &$this, 'attachment_url_filter' ) );
+		remove_filter( 'wp_get_attachment_url', array( $this, 'attachment_url_filter' ) );
 		$filename .= $this->get_extension( wp_get_attachment_url( $attach->ID ) );
-		add_filter( 'wp_get_attachment_url', array( &$this, 'attachment_url_filter' ), 10, 2 );
+		add_filter( 'wp_get_attachment_url', array( $this, 'attachment_url_filter' ), 10, 2 );
 
 		$headers = array();
 
@@ -549,7 +549,7 @@ trait WP_Document_Revisions_File_Handler {
 
 		self::$doc_image = false;
 		// we are going to load the attachment into the upload directory, so invoke filter.
-		add_filter( 'upload_dir', array( &$this, 'document_upload_dir_filter' ) );
+		add_filter( 'upload_dir', array( $this, 'document_upload_dir_filter' ) );
 		// it will be removed in "generate_metadata" processing - at end of media_handle_upload.
 
 		// store original file name.
@@ -647,7 +647,7 @@ trait WP_Document_Revisions_File_Handler {
 		$metadata['wpdr_hidden'] = 1;
 
 		// have finished loading the attachment into the upload directory, so remove it.
-		remove_filter( 'upload_dir', array( &$this, 'document_upload_dir_filter' ) );
+		remove_filter( 'upload_dir', array( $this, 'document_upload_dir_filter' ) );
 
 		return $metadata;
 	}
@@ -845,9 +845,9 @@ trait WP_Document_Revisions_File_Handler {
 		}
 
 		// temporarily remove our filter to get the true URL, not the permalink.
-		remove_filter( 'wp_get_attachment_url', array( &$this, 'attachment_url_filter' ) );
+		remove_filter( 'wp_get_attachment_url', array( $this, 'attachment_url_filter' ) );
 		$url = wp_get_attachment_url( $this->get_document( $latest->ID )->ID );
-		add_filter( 'wp_get_attachment_url', array( &$this, 'attachment_url_filter' ), 10, 2 );
+		add_filter( 'wp_get_attachment_url', array( $this, 'attachment_url_filter' ), 10, 2 );
 
 		return $url;
 	}
@@ -1190,14 +1190,14 @@ trait WP_Document_Revisions_File_Handler {
 			return $downsize;
 		}
 
-		remove_filter( 'image_downsize', array( &$this, 'image_downsize' ) );
-		remove_filter( 'wp_get_attachment_url', array( &$this, 'attachment_url_filter' ) );
+		remove_filter( 'image_downsize', array( $this, 'image_downsize' ) );
+		remove_filter( 'wp_get_attachment_url', array( $this, 'attachment_url_filter' ) );
 
 		$direct = wp_get_attachment_url( $id );
 		$image  = image_downsize( $id, $size );
 
-		add_filter( 'image_downsize', array( &$this, 'image_downsize' ), 10, 3 );
-		add_filter( 'wp_get_attachment_url', array( &$this, 'attachment_url_filter' ), 10, 2 );
+		add_filter( 'image_downsize', array( $this, 'image_downsize' ), 10, 3 );
+		add_filter( 'wp_get_attachment_url', array( $this, 'attachment_url_filter' ), 10, 2 );
 
 		// if WordPress is going to return the direct url to the real file,
 		// serve the document permalink (or revision permalink) instead.

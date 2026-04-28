@@ -183,7 +183,7 @@ trait WP_Document_Revisions_Revisions {
 		// verify that there is a lock.
 		$current_owner = wp_check_post_lock( $post_id );
 		if ( ! ( $current_owner ) ) {
-			die( '-1' );
+			wp_die( '-1' );
 		}
 
 		// update the lock.
@@ -203,7 +203,7 @@ trait WP_Document_Revisions_Revisions {
 
 		do_action( 'document_lock_override', $post_id, $current_user->ID, $current_owner );
 
-		die( '1' );
+		wp_die( '1' );
 	}
 
 

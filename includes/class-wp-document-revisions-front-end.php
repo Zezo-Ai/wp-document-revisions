@@ -43,7 +43,7 @@ class WP_Document_Revisions_Front_End {
 	 *
 	 * @param Object $instance The WP Document Revisions instance.
 	 */
-	public function __construct( ?object &$instance = null ) {
+	public function __construct( ?object $instance = null ) {
 
 		self::$instance = &$this;
 
@@ -51,18 +51,18 @@ class WP_Document_Revisions_Front_End {
 		if ( is_null( $instance ) ) {
 			self::$parent = new WP_Document_Revisions();
 		} else {
-			self::$parent = &$instance;
+			self::$parent = $instance;
 		}
 
-		add_shortcode( 'document_revisions', array( &$this, 'revisions_shortcode' ) );
-		add_shortcode( 'documents', array( &$this, 'documents_shortcode' ) );
-		add_filter( 'document_shortcode_atts', array( &$this, 'shortcode_atts_hyphen_filter' ) );
+		add_shortcode( 'document_revisions', array( $this, 'revisions_shortcode' ) );
+		add_shortcode( 'documents', array( $this, 'documents_shortcode' ) );
+		add_filter( 'document_shortcode_atts', array( $this, 'shortcode_atts_hyphen_filter' ) );
 
 		// Add blocks. Done after wp_loaded so that the taxonomies have been defined.
-		add_action( 'wp_loaded', array( &$this, 'documents_shortcode_blocks' ), 100 );
+		add_action( 'wp_loaded', array( $this, 'documents_shortcode_blocks' ), 100 );
 
 		// Queue up JS (low priority to be at end).
-		add_action( 'wp_enqueue_scripts', array( &$this, 'enqueue_front' ), 50 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_front' ), 50 );
 	}
 
 

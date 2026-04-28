@@ -32,7 +32,7 @@ trait WP_Document_Revisions_Rewrites {
 		$slug = $this->document_slug();
 
 		// remove any previous versions of file matches (will be added back if same).
-		$rules = array_filter( $rules, array( &$this, 'remove_old_rules' ), ARRAY_FILTER_USE_KEY );
+		$rules = array_filter( $rules, array( $this, 'remove_old_rules' ), ARRAY_FILTER_USE_KEY );
 
 		$my_rules = array();
 

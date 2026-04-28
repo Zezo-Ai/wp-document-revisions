@@ -299,7 +299,7 @@ trait WP_Document_Revisions_Query {
 			global $wp_taxonomies;
 
 			foreach ( $taxs as $tax ) {
-					$wp_taxonomies[ $tax ]->update_count_callback = array( &$this, 'term_count_cb' );
+					$wp_taxonomies[ $tax ]->update_count_callback = array( $this, 'term_count_cb' );
 			}
 		}
 	}
@@ -469,9 +469,9 @@ trait WP_Document_Revisions_Query {
 	 * @param Object $taxonomy the taxonomy object.
 	 */
 	public function term_count_cb( array $terms, object $taxonomy ): void {
-		add_filter( 'query', array( &$this, 'term_count_query_filter' ) );
+		add_filter( 'query', array( $this, 'term_count_query_filter' ) );
 		_update_post_term_count( $terms, $taxonomy );
-		remove_filter( 'query', array( &$this, 'term_count_query_filter' ) );
+		remove_filter( 'query', array( $this, 'term_count_query_filter' ) );
 	}
 
 	/**

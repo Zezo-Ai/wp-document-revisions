@@ -90,15 +90,15 @@ trait WP_Document_Revisions_Admin_Editor {
 		remove_meta_box( 'tagsdiv-workflow_state', 'document', 'side' );
 
 		// add our meta boxes.
-		add_meta_box( 'revision-summary', __( 'Revision Summary', 'wp-document-revisions' ), array( &$this, 'revision_summary_cb' ), 'document', 'normal', 'default' );
-		add_meta_box( 'document', __( 'Document', 'wp-document-revisions' ), array( &$this, 'document_metabox' ), 'document', 'normal', 'high' );
+		add_meta_box( 'revision-summary', __( 'Revision Summary', 'wp-document-revisions' ), array( $this, 'revision_summary_cb' ), 'document', 'normal', 'default' );
+		add_meta_box( 'document', __( 'Document', 'wp-document-revisions' ), array( $this, 'document_metabox' ), 'document', 'normal', 'high' );
 
 		if ( ! empty( $post->post_content ) ) {
-			add_meta_box( 'revision-log', __( 'Revision Log', 'wp-document-revisions' ), array( &$this, 'revision_metabox' ), 'document', 'normal', 'low' );
+			add_meta_box( 'revision-log', __( 'Revision Log', 'wp-document-revisions' ), array( $this, 'revision_metabox' ), 'document', 'normal', 'low' );
 		}
 
 		if ( taxonomy_exists( 'workflow_state' ) && ! $this->disable_workflow_states() ) {
-			add_meta_box( 'workflow-state', __( 'Workflow State', 'wp-document-revisions' ), array( &$this, 'workflow_state_metabox_cb' ), 'document', 'side', 'default' );
+			add_meta_box( 'workflow-state', __( 'Workflow State', 'wp-document-revisions' ), array( $this, 'workflow_state_metabox_cb' ), 'document', 'side', 'default' );
 		}
 
 		// move author div to make room for ours.
@@ -106,14 +106,14 @@ trait WP_Document_Revisions_Admin_Editor {
 
 		// only add author div if user can give someone else ownership.
 		if ( current_user_can( 'edit_others_documents' ) ) {
-			add_meta_box( 'authordiv', __( 'Owner', 'wp-document-revisions' ), array( &$this, 'post_author_meta_box' ), 'document', 'side', 'low' );
+			add_meta_box( 'authordiv', __( 'Owner', 'wp-document-revisions' ), array( $this, 'post_author_meta_box' ), 'document', 'side', 'low' );
 		}
 
 		// By default revisions are unlimited, but user filter may have limited number. Check if impact.
-		add_action( 'admin_notices', array( &$this, 'check_document_revisions_limit' ) );
+		add_action( 'admin_notices', array( $this, 'check_document_revisions_limit' ) );
 
 		// lock notice.
-		add_action( 'admin_notices', array( &$this, 'lock_notice' ) );
+		add_action( 'admin_notices', array( $this, 'lock_notice' ) );
 
 		do_action( 'document_edit' );
 	}
@@ -517,7 +517,11 @@ trait WP_Document_Revisions_Admin_Editor {
 				$vers,
 				false
 			);
-			wp_localize_script( 'wp_document_revisions', 'wp_document_revisions', $data );
+			wp_add_inline_script(
+				'wp_document_revisions',
+				'var wp_document_revisions = ' . wp_json_encode( $data ) . ';',
+				'before'
+			);
 		}
 
 		// enqueue CSS.

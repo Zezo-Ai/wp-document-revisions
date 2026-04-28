@@ -131,32 +131,32 @@ class WP_Document_Revisions {
 		self::$wp_default_dir = wp_upload_dir( null, true, true );
 
 		// admin. translations need to be called on init, not plugins_loaded.
-		add_action( 'plugins_loaded', array( &$this, 'admin_init' ) );
-		add_action( 'init', array( &$this, 'i18n' ), 5 );
-		add_action( 'admin_notices', array( &$this, 'activation_error_notice' ) );
+		add_action( 'plugins_loaded', array( $this, 'admin_init' ) );
+		add_action( 'init', array( $this, 'i18n' ), 5 );
+		add_action( 'admin_notices', array( $this, 'activation_error_notice' ) );
 
 		// CPT/CT.
-		add_action( 'init', array( &$this, 'register_cpt' ) );
-		add_action( 'init', array( &$this, 'register_ct' ), 2000 ); // note: low priority to allow for edit flow/publishpress support.
-		add_action( 'admin_init', array( &$this, 'initialize_workflow_states' ) );
+		add_action( 'init', array( $this, 'register_cpt' ) );
+		add_action( 'init', array( $this, 'register_ct' ), 2000 ); // note: low priority to allow for edit flow/publishpress support.
+		add_action( 'admin_init', array( $this, 'initialize_workflow_states' ) );
 
 		// Abilities API (WP 6.9+).
-		add_action( 'wp_abilities_api_categories_init', array( &$this, 'register_ability_category' ) );
-		add_action( 'wp_abilities_api_init', array( &$this, 'register_abilities' ) );
+		add_action( 'wp_abilities_api_categories_init', array( $this, 'register_ability_category' ) );
+		add_action( 'wp_abilities_api_init', array( $this, 'register_abilities' ) );
 		// check whether to invoke old or new count method (Change will need #38843 - deal with beta release).
 		global $wp_version;
 		$vers = strpos( $wp_version, '-' );
 		$vers = $vers ? substr( $wp_version, 0, $vers ) : $wp_version;
 		if ( version_compare( $vers, '5.7' ) >= 0 ) {
 			// core method introduced with version 5.7.
-			add_filter( 'update_post_term_count_statuses', array( &$this, 'review_count_statuses' ), 30, 2 );
+			add_filter( 'update_post_term_count_statuses', array( $this, 'review_count_statuses' ), 30, 2 );
 		} else {
-			add_action( 'admin_init', array( &$this, 'register_term_count_cb' ), 2000 ); // note: late and low priority to allow for all taxonomies.
+			add_action( 'admin_init', array( $this, 'register_term_count_cb' ), 2000 ); // note: late and low priority to allow for all taxonomies.
 		}
-		add_filter( 'the_content', array( &$this, 'content_filter' ), 1 );
+		add_filter( 'the_content', array( $this, 'content_filter' ), 1 );
 
 		// filter the queries to ensure readable.
-		add_action( 'pre_get_posts', array( &$this, 'retrieve_documents' ) );
+		add_action( 'pre_get_posts', array( $this, 'retrieve_documents' ) );
 
 		// rewrites and permalinks.
 		/**
@@ -178,61 +178,61 @@ class WP_Document_Revisions {
 		 * @param string $pattern helps define a more specific sub-directory for no direct file access.
 		 */
 		if ( '' !== apply_filters( 'document_stop_file_access_pattern', '' ) ) {
-			add_action( 'generate_rewrite_rules', array( &$this, 'generate_rewrite_rules' ) );
-			add_filter( 'mod_rewrite_rules', array( &$this, 'mod_rewrite_rules' ) );
+			add_action( 'generate_rewrite_rules', array( $this, 'generate_rewrite_rules' ) );
+			add_filter( 'mod_rewrite_rules', array( $this, 'mod_rewrite_rules' ) );
 		}
-		add_filter( 'rewrite_rules_array', array( &$this, 'revision_rewrite' ) );
-		add_filter( 'transient_rewrite_rules', array( &$this, 'revision_rewrite' ) );
-		add_action( 'init', array( &$this, 'inject_rules' ) );
-		add_action( 'post_type_link', array( &$this, 'permalink' ), 10, 3 );
-		add_action( 'post_link', array( &$this, 'permalink' ), 10, 3 );
-		add_filter( 'template_include', array( &$this, 'serve_file' ), 10, 1 );
-		add_filter( 'serve_document_auth', array( &$this, 'serve_document_auth' ), 10, 3 );
-		add_action( 'parse_request', array( &$this, 'ie_cache_fix' ) );
-		add_filter( 'query_vars', array( &$this, 'add_query_var' ) );
-		add_filter( 'default_feed', array( &$this, 'hijack_feed' ) );
-		add_action( 'do_feed_revision_log', array( &$this, 'do_feed_revision_log' ) );
-		add_action( 'template_redirect', array( &$this, 'revision_feed_auth' ) );
-		add_filter( 'get_sample_permalink_html', array( &$this, 'sample_permalink_html_filter' ), 10, 5 );
-		add_filter( 'wp_get_attachment_url', array( &$this, 'attachment_url_filter' ), 10, 2 );
-		add_filter( 'image_downsize', array( &$this, 'image_downsize' ), 10, 3 );
-		add_filter( 'document_path', array( &$this, 'wamp_document_path_filter' ), 9, 1 );
-		add_filter( 'redirect_canonical', array( &$this, 'redirect_canonical_filter' ), 10, 2 );
-		add_action( 'wp_ajax_sample-permalink', array( &$this, 'update_post_slug_field' ), 0 );
+		add_filter( 'rewrite_rules_array', array( $this, 'revision_rewrite' ) );
+		add_filter( 'transient_rewrite_rules', array( $this, 'revision_rewrite' ) );
+		add_action( 'init', array( $this, 'inject_rules' ) );
+		add_action( 'post_type_link', array( $this, 'permalink' ), 10, 3 );
+		add_action( 'post_link', array( $this, 'permalink' ), 10, 3 );
+		add_filter( 'template_include', array( $this, 'serve_file' ), 10, 1 );
+		add_filter( 'serve_document_auth', array( $this, 'serve_document_auth' ), 10, 3 );
+		add_action( 'parse_request', array( $this, 'ie_cache_fix' ) );
+		add_filter( 'query_vars', array( $this, 'add_query_var' ) );
+		add_filter( 'default_feed', array( $this, 'hijack_feed' ) );
+		add_action( 'do_feed_revision_log', array( $this, 'do_feed_revision_log' ) );
+		add_action( 'template_redirect', array( $this, 'revision_feed_auth' ) );
+		add_filter( 'get_sample_permalink_html', array( $this, 'sample_permalink_html_filter' ), 10, 5 );
+		add_filter( 'wp_get_attachment_url', array( $this, 'attachment_url_filter' ), 10, 2 );
+		add_filter( 'image_downsize', array( $this, 'image_downsize' ), 10, 3 );
+		add_filter( 'document_path', array( $this, 'wamp_document_path_filter' ), 9, 1 );
+		add_filter( 'redirect_canonical', array( $this, 'redirect_canonical_filter' ), 10, 2 );
+		add_action( 'wp_ajax_sample-permalink', array( $this, 'update_post_slug_field' ), 0 );
 
 		// RSS.
-		add_filter( 'private_title_format', array( &$this, 'no_title_prepend' ), 20 );
-		add_filter( 'protected_title_format', array( &$this, 'no_title_prepend' ), 20 );
-		add_filter( 'the_title', array( &$this, 'add_revision_num_to_title' ), 20, 2 );
+		add_filter( 'private_title_format', array( $this, 'no_title_prepend' ), 20 );
+		add_filter( 'protected_title_format', array( $this, 'no_title_prepend' ), 20 );
+		add_filter( 'the_title', array( $this, 'add_revision_num_to_title' ), 20, 2 );
 
 		// uploads.
-		add_filter( 'attachment_link', array( &$this, 'attachment_link_filter' ), 10, 2 );
-		add_filter( 'get_attached_file', array( &$this, 'get_attached_file_filter' ), 10, 2 );
-		add_filter( 'wp_handle_upload_prefilter', array( &$this, 'filename_rewrite' ) );
-		add_filter( 'wp_handle_upload', array( &$this, 'rewrite_file_url' ), 10, 2 );
+		add_filter( 'attachment_link', array( $this, 'attachment_link_filter' ), 10, 2 );
+		add_filter( 'get_attached_file', array( $this, 'get_attached_file_filter' ), 10, 2 );
+		add_filter( 'wp_handle_upload_prefilter', array( $this, 'filename_rewrite' ) );
+		add_filter( 'wp_handle_upload', array( $this, 'rewrite_file_url' ), 10, 2 );
 		// Hide slug by changing metadata name - do early in case of WPML.
-		add_filter( 'wp_generate_attachment_metadata', array( &$this, 'hide_doc_attach_slug' ), 5, 3 );
+		add_filter( 'wp_generate_attachment_metadata', array( $this, 'hide_doc_attach_slug' ), 5, 3 );
 		// initialise document directory (will itself populate cache).
 		$this->document_upload_dir();
 
 		// locking.
-		add_action( 'wp_ajax_override_lock', array( &$this, 'override_lock' ) );
+		add_action( 'wp_ajax_override_lock', array( $this, 'override_lock' ) );
 
 		// cache clean.
-		add_action( 'save_post_document', array( &$this, 'clear_cache' ), 20, 3 );
+		add_action( 'save_post_document', array( $this, 'clear_cache' ), 20, 3 );
 
 		// Edit Flow or PublishPress Statuses.
-		add_action( 'ef_module_options_loaded', array( &$this, 'edit_flow_support' ) );
-		add_action( 'pp_statuses_init', array( &$this, 'publishpress_statuses_support' ), 20 );
+		add_action( 'ef_module_options_loaded', array( $this, 'edit_flow_support' ) );
+		add_action( 'pp_statuses_init', array( $this, 'publishpress_statuses_support' ), 20 );
 		// always called to determine whether user has turned off workflow_state support.
-		add_action( 'init', array( &$this, 'disable_workflow_states' ), 1900 );
+		add_action( 'init', array( $this, 'disable_workflow_states' ), 1900 );
 
 		// don't leak summary information if user can't access admin pages.
-		add_filter( 'get_the_excerpt', array( &$this, 'empty_excerpt_return' ), 10, 2 );
+		add_filter( 'get_the_excerpt', array( $this, 'empty_excerpt_return' ), 10, 2 );
 
 		// no next/previous navigation links (would appear on password entry page).
-		add_filter( 'get_next_post_where', array( &$this, 'suppress_adjacent_doc' ), 10, 5 );
-		add_filter( 'get_previous_post_where', array( &$this, 'suppress_adjacent_doc' ), 10, 5 );
+		add_filter( 'get_next_post_where', array( $this, 'suppress_adjacent_doc' ), 10, 5 );
+		add_filter( 'get_previous_post_where', array( $this, 'suppress_adjacent_doc' ), 10, 5 );
 
 		// block external processes from deleting revisions.
 		add_filter( 'pre_delete_post', array( $this, 'possibly_delete_revision' ), 9999, 3 );
@@ -260,7 +260,7 @@ class WP_Document_Revisions {
 		new WP_Document_Revisions_Validate_Structure( $this );
 
 		// Manage REST interface for documents (include code).
-		add_action( 'rest_api_init', array( &$this, 'manage_rest' ) );
+		add_action( 'rest_api_init', array( $this, 'manage_rest' ) );
 	}
 
 	/**
@@ -759,7 +759,7 @@ class WP_Document_Revisions {
 			);
 			if ( ! current_user_can( 'read_documents' ) ) {
 				// user does not have read_documents capability, so any need to be filtered out of results.
-				add_filter( 'posts_results', array( &$this, 'posts_results' ), 10, 2 );
+				add_filter( 'posts_results', array( $this, 'posts_results' ), 10, 2 );
 			}
 		}
 
@@ -794,7 +794,7 @@ class WP_Document_Revisions {
 			// Ensure that there is a post-thumbnail size set - could/should be set by theme - default copy from thumbnail.
 			if ( ! array_key_exists( 'post-thumbnail', wp_get_additional_image_sizes() ) ) {
 				// get sizing dynamically.
-				add_filter( 'post_thumbnail_size', array( &$this, 'document_featured_image_size' ), 10, 2 );
+				add_filter( 'post_thumbnail_size', array( $this, 'document_featured_image_size' ), 10, 2 );
 			}
 		}
 
@@ -830,7 +830,7 @@ class WP_Document_Revisions {
 			// core method introduced with version 5.7. callback not needed.
 			$ucc = '';
 		} else {
-			$ucc = array( &$this, 'term_count_cb' );
+			$ucc = array( $this, 'term_count_cb' );
 		}
 
 		/**
@@ -1086,11 +1086,11 @@ class WP_Document_Revisions {
 		self::$taxonomy_key_val = EF_Custom_Status::taxonomy_key;
 
 		// EF doesn't add Status to Document view so need to add it.
-		add_filter( 'manage_document_posts_columns', array( &$this, 'add_post_status_column' ) );
-		add_action( 'manage_document_posts_custom_column', array( &$this, 'post_status_column_cb' ), 10, 2 );
+		add_filter( 'manage_document_posts_columns', array( $this, 'add_post_status_column' ) );
+		add_action( 'manage_document_posts_custom_column', array( $this, 'post_status_column_cb' ), 10, 2 );
 
 		// workflow_state will be used as a query_var, but is not one.
-		add_filter( 'query_vars', array( &$this, 'add_qv_workflow_state' ), 10 );
+		add_filter( 'query_vars', array( $this, 'add_qv_workflow_state' ), 10 );
 
 		// we are going to use Edit_Flow / Publish Press processes if installed and active.
 		// make sure use_workflow_states returns false.
@@ -1127,11 +1127,11 @@ class WP_Document_Revisions {
 		self::$taxonomy_key_val = 'post_status';
 
 		// PPS doesn't add Status to Document view so need to add it.
-		add_filter( 'manage_document_posts_columns', array( &$this, 'add_post_status_column' ) );
-		add_action( 'manage_document_posts_custom_column', array( &$this, 'post_status_column_cb' ), 10, 2 );
+		add_filter( 'manage_document_posts_columns', array( $this, 'add_post_status_column' ) );
+		add_action( 'manage_document_posts_custom_column', array( $this, 'post_status_column_cb' ), 10, 2 );
 
 		// workflow_state will be used as a query_var, but is not one.
-		add_filter( 'query_vars', array( &$this, 'add_qv_workflow_state' ), 10 );
+		add_filter( 'query_vars', array( $this, 'add_qv_workflow_state' ), 10 );
 
 		// we are going to use PPS processes if installed and active.
 		// make sure use_workflow_states returns false.
@@ -1165,8 +1165,8 @@ class WP_Document_Revisions {
 			self::$taxonomy_key_val = '';
 		}
 
-		remove_action( 'admin_init', array( &$this, 'initialize_workflow_states' ) );
-		remove_action( 'init', array( &$this, 'register_ct' ), 2000 );
+		remove_action( 'admin_init', array( $this, 'initialize_workflow_states' ) );
+		remove_action( 'init', array( $this, 'register_ct' ), 2000 );
 	}
 
 	/**

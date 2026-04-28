@@ -118,8 +118,8 @@ trait WP_Document_Revisions_Admin_Settings {
 		}
 
 		// note: hook late so that unattached filter can hook in, if necessary.
-		add_filter( 'posts_join_paged', array( &$this, 'filter_media_join' ) );
-		add_filter( 'posts_where_paged', array( &$this, 'filter_media_where' ), 20 );
+		add_filter( 'posts_join_paged', array( $this, 'filter_media_join' ) );
+		add_filter( 'posts_where_paged', array( $this, 'filter_media_where' ), 20 );
 	}
 
 
@@ -315,22 +315,22 @@ trait WP_Document_Revisions_Admin_Settings {
 	 * @since 0.5
 	 */
 	public function settings_fields(): void {
-		register_setting( 'media', 'document_upload_directory', array( &$this, 'sanitize_upload_dir' ) );
-		register_setting( 'media', 'document_slug', array( &$this, 'sanitize_document_slug' ) );
-		add_settings_field( 'document_upload_directory', __( 'Document Upload Directory', 'wp-document-revisions' ), array( &$this, 'upload_location_cb' ), 'media', 'uploads' );
-		add_settings_field( 'document_slug', __( 'Document Slug', 'wp-document-revisions' ), array( &$this, 'document_slug_cb' ), 'media', 'uploads' );
+		register_setting( 'media', 'document_upload_directory', array( $this, 'sanitize_upload_dir' ) );
+		register_setting( 'media', 'document_slug', array( $this, 'sanitize_document_slug' ) );
+		add_settings_field( 'document_upload_directory', __( 'Document Upload Directory', 'wp-document-revisions' ), array( $this, 'upload_location_cb' ), 'media', 'uploads' );
+		add_settings_field( 'document_slug', __( 'Document Slug', 'wp-document-revisions' ), array( $this, 'document_slug_cb' ), 'media', 'uploads' );
 		register_setting(
 			'media',
 			'document_link_date',
 			array(
 				'type'              => 'boolean',
-				'sanitize_callback' => array( &$this, 'sanitize_link_date' ),
+				'sanitize_callback' => array( $this, 'sanitize_link_date' ),
 			)
 		);
 		add_settings_field(
 			'document_link_date',
 			__( 'Document Date in Permalink', 'wp-document-revisions' ),
-			array( &$this, 'document_link_date_cb' ),
+			array( $this, 'document_link_date_cb' ),
 			'media',
 			'uploads'
 		);
@@ -793,11 +793,11 @@ trait WP_Document_Revisions_Admin_Settings {
 			return false;
 		}
 
-		remove_action( 'set_object_terms', array( &$this, 'workflow_state_save' ) );
+		remove_action( 'set_object_terms', array( $this, 'workflow_state_save' ) );
 
 		// Have changed taxonomy key for EF/PP support, so switch off make private.
 		if ( ! empty( self::$parent->taxonomy_key() ) && 'workflow_state' !== self::$parent->taxonomy_key() ) {
-			remove_action( 'admin_head', array( &$this, 'make_private' ) );
+			remove_action( 'admin_head', array( $this, 'make_private' ) );
 		}
 		return true;
 	}

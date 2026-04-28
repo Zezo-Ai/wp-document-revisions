@@ -32,27 +32,27 @@ class WP_Document_Revisions_Manage_Rest {
 	 * @param object $instance class instance.
 	 * @return void
 	 */
-	public function __construct( ?object &$instance = null ) {
+	public function __construct( ?object $instance = null ) {
 		self::$instance = &$this;
 
 		// create or store parent instance.
 		if ( null === $instance ) {
 			self::$parent = new WP_Document_Revisions();
 		} else {
-			self::$parent = &$instance;
+			self::$parent = $instance;
 		}
 
 		// additional validation.
-		add_filter( 'rest_request_before_callbacks', array( &$this, 'document_validation' ), 10, 3 );
+		add_filter( 'rest_request_before_callbacks', array( $this, 'document_validation' ), 10, 3 );
 
 		// hide data.
-		add_filter( 'rest_prepare_document', array( &$this, 'doc_clean_document' ), 10, 3 );
-		add_filter( 'rest_prepare_revision', array( &$this, 'doc_clean_revision' ), 10, 3 );
-		add_filter( 'rest_prepare_attachment', array( &$this, 'doc_clean_attachment' ), 10, 3 );
+		add_filter( 'rest_prepare_document', array( $this, 'doc_clean_document' ), 10, 3 );
+		add_filter( 'rest_prepare_revision', array( $this, 'doc_clean_revision' ), 10, 3 );
+		add_filter( 'rest_prepare_attachment', array( $this, 'doc_clean_attachment' ), 10, 3 );
 
 		// Block editor content/meta sync.
 		if ( apply_filters( 'document_use_block_editor', false ) ) {
-			add_filter( 'rest_pre_insert_document', array( &$this, 'sync_meta_to_content' ), 10, 2 );
+			add_filter( 'rest_pre_insert_document', array( $this, 'sync_meta_to_content' ), 10, 2 );
 		}
 	}
 

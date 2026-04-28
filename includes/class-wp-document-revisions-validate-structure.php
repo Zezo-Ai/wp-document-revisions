@@ -160,7 +160,7 @@ class WP_Document_Revisions_Validate_Structure {
 	 * @param object $instance class instance.
 	 * @return void
 	 */
-	public function __construct( ?object &$instance = null ) {
+	public function __construct( ?object $instance = null ) {
 		self::$instance = &$this;
 
 		// create or store parent instance.
@@ -168,13 +168,13 @@ class WP_Document_Revisions_Validate_Structure {
 			global $wpdr;
 			self::$parent = $wpdr;
 		} else {
-			self::$parent = &$instance;
+			self::$parent = $instance;
 		}
 
-		add_action( 'admin_menu', array( &$this, 'add_menu' ), 20 );
+		add_action( 'admin_menu', array( $this, 'add_menu' ), 20 );
 
-		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_scripts' ) );
-		add_action( 'rest_api_init', array( &$this, 'wpdr_register_route' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'rest_api_init', array( $this, 'wpdr_register_route' ) );
 	}
 
 	/**
@@ -210,8 +210,8 @@ class WP_Document_Revisions_Validate_Structure {
 		$valid_codes = array( 4, 5, 6, 7, 9, 10, 11, 12 );
 		$args        = array(
 			'methods'             => \WP_REST_Server::EDITABLE,
-			'callback'            => array( &$this, 'correct_document' ),
-			'permission_callback' => array( &$this, 'check_permission' ),
+			'callback'            => array( $this, 'correct_document' ),
+			'permission_callback' => array( $this, 'check_permission' ),
 			'args'                => array(
 				'id'   => array(
 					'type'              => 'integer',
