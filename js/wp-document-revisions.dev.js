@@ -11,6 +11,7 @@
 		hasUpload = false;
 		secure = 'https:' === window.location.protocol;
 		window = window.dialogArguments || opener || parent || top;
+		_uploadProgressShown = false;
 
 		constructor() {
 			document.querySelectorAll('.revision').forEach((el) => {
@@ -86,6 +87,62 @@
 				if (prev) {
 					prev.style.display = '';
 				}
+			}
+		};
+
+		clearUploadNotices = () => {
+			const wDoc = this.window.document;
+			const ids = ['wpdr-upload-confirm', 'wpdr-upload-progress', 'wpdr-save-first-notice', 'wpdr-upload-error'];
+			ids.forEach((id) => {
+				const el = wDoc.getElementById(id);
+				if (el) {
+					el.parentNode.removeChild(el);
+				}
+			});
+		};
+
+		showUploadProgress = () => {
+			if (this._uploadProgressShown) {
+				return;
+			}
+			this._uploadProgressShown = true;
+			const wDoc = this.window.document;
+			const docMetabox = typeof wDoc.querySelector === 'function'
+				? wDoc.querySelector('#document .inside')
+				: null;
+			if (docMetabox) {
+				this.clearUploadNotices();
+				const progress = wDoc.createElement('p');
+				progress.id = 'wpdr-upload-progress';
+				progress.innerHTML = '<span class="spinner is-active" style="float:none;margin:0 4px 0 0;"></span>' +
+					(wp_document_revisions.uploadProgress || 'Uploading…');
+				progress.style.cssText = 'color:#646970;margin:8px 0;';
+				const clearDiv = docMetabox.querySelector('.clear');
+				if (clearDiv) {
+					docMetabox.insertBefore(progress, clearDiv);
+				} else {
+					docMetabox.appendChild(progress);
+				}
+			}
+		};
+
+		showUploadError = (errorText) => {
+			const wDoc = this.window.document;
+			this.clearUploadNotices();
+			this._uploadProgressShown = false;
+			const post = wDoc.getElementById('post');
+			if (post) {
+				const safeText = errorText ? String(errorText).replace(/[<>&"]/g, (c) => ({
+					'<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;',
+				}[c])) : '';
+				const notice = wp_document_revisions.uploadErrorNotice ||
+					'<div id="wpdr-upload-error" class="error"><p>Upload failed.</p></div>';
+				// Insert localized notice, appending escaped error detail if available.
+				let html = notice;
+				if (safeText) {
+					html = html.replace('</p></div>', ' ' + safeText + '</p></div>');
+				}
+				post.insertAdjacentHTML('beforebegin', html);
 			}
 		};
 
@@ -224,6 +281,9 @@
 				return;
 			}
 			this._uploaderBound = true;
+			uploader.bind('UploadFile', () => {
+				this.showUploadProgress();
+			});
 			return uploader.bind('FileUploaded', (up, file, response) => {
 				return this.postDocumentUpload(file.name, response.response);
 			});
@@ -315,6 +375,8 @@
 		};
 
 		postDocumentUpload = (file, attachmentID) => {
+			this._uploadProgressShown = false;
+
 			// Normalize JSON responses from WordPress 6.9+ async-upload.php.
 			if (typeof attachmentID === 'string') {
 				const trimmed = attachmentID.trim();
@@ -324,11 +386,9 @@
 						if (json.success && json.data && json.data.id) {
 							attachmentID = String(json.data.id);
 						} else {
-							const msg = (json.data && json.data.message) || json.data || attachmentID;
-							const mediaItem = document.querySelector('.media-item');
-							if (mediaItem) {
-								mediaItem.innerHTML = String(msg);
-							}
+							const msg = (json.data && json.data.message) || json.data || '';
+							this.window.tb_remove();
+							this.showUploadError(String(msg));
 							return;
 						}
 					} catch (e) {
@@ -338,22 +398,35 @@
 			}
 
 			if (typeof attachmentID === 'string' && attachmentID.indexOf('error') !== -1) {
-				const mediaItem = document.querySelector('.media-item');
-				if (mediaItem) {
-					mediaItem.innerHTML = attachmentID;
-				}
+				this.window.tb_remove();
+				this.showUploadError(attachmentID);
 				return;
 			}
 			if (file instanceof Object) {
 				file = file.name.split('.').pop();
 			}
 			if (this.hasUpload) {
+				this.window.tb_remove();
+				this.clearUploadNotices();
+				const wDoc = this.window.document;
+				const post = wDoc.getElementById('post');
+				if (post) {
+					post.insertAdjacentHTML('beforebegin',
+						'<div id="wpdr-save-first-notice" class="error"><p>' +
+						(wp_document_revisions.saveFirstNotice || 'Please save the current version before uploading another.') +
+						'</p></div>');
+				}
 				return;
 			}
 			// On upload set the document identifier in the new format.
 			const docID = /\d+$/.exec(attachmentID);
-			// This will throw away the description for an existing post - but it is in content.
+			if (!docID) {
+				this.window.tb_remove();
+				this.showUploadError('');
+				return;
+			}
 			const wDoc = this.window.document;
+			this.clearUploadNotices();
 			const postContent = wDoc.getElementById('post_content');
 			if (postContent) {
 				postContent.value = `<!-- WPDR ${docID} -->`;
@@ -379,7 +452,6 @@
 					(wp_document_revisions.uploadConfirmation || 'New version uploaded.') +
 					'</strong>';
 				uploadConfirm.style.cssText = 'color:#00a32a;margin:8px 0;';
-				// Insert before the "clear" div at the end.
 				const clearDiv = docMetabox.querySelector('.clear');
 				if (clearDiv) {
 					docMetabox.insertBefore(uploadConfirm, clearDiv);
@@ -388,13 +460,6 @@
 				}
 			}
 			this.enableSubmit();
-			const samplePermalink = wDoc.getElementById('sample-permalink');
-			if (samplePermalink) {
-				samplePermalink.innerHTML = samplePermalink.innerHTML.replace(
-					/\<\/span>(\.[a-z0-9]{1,7})?@$/i,
-					wp_document_revisions.extension
-				);
-			}
 		}
 
 		checkUpdate = () => {

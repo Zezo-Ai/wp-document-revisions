@@ -12,6 +12,16 @@ const MODULE_PATH = path.resolve(__dirname, '../../js/wp-document-revisions.dev.
 describe('WPDocumentRevisions', () => {
 	let WPDocumentRevisions;
 
+	// Helper for window.document.getElementById mock elements (needs parentNode for clearUploadNotices)
+	const mockWindowEl = (overrides) => ({
+		value: '',
+		style: { display: '' },
+		innerHTML: '',
+		insertAdjacentHTML: jest.fn(),
+		parentNode: { removeChild: jest.fn() },
+		...overrides,
+	});
+
 	// Default mock element factory for document.getElementById
 	const mockElement = (id) => ({
 		id,
@@ -26,6 +36,7 @@ describe('WPDocumentRevisions', () => {
 		querySelector: jest.fn(() => null),
 		querySelectorAll: jest.fn(() => []),
 		insertAdjacentHTML: jest.fn(),
+		parentNode: { removeChild: jest.fn() },
 		previousElementSibling: null,
 		offsetParent: null,
 		disabled: false,
@@ -508,7 +519,7 @@ describe('WPDocumentRevisions', () => {
 			WPDocumentRevisions.hasUpload = false;
 			WPDocumentRevisions.window = {
 				document: {
-					getElementById: jest.fn(() => ({ value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() })),
+					getElementById: jest.fn(() => (mockWindowEl())),
 				},
 				tb_remove: jest.fn(),
 			};
@@ -522,18 +533,23 @@ describe('WPDocumentRevisions', () => {
 
 		test('should return early if hasUpload is already true', () => {
 			WPDocumentRevisions.hasUpload = true;
-			const initialState = true;
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn(() => mockWindowEl()),
+				},
+				tb_remove: jest.fn(),
+			};
 
 			WPDocumentRevisions.postDocumentUpload('test.pdf', '123');
 
-			expect(WPDocumentRevisions.hasUpload).toBe(initialState);
+			expect(WPDocumentRevisions.hasUpload).toBe(true);
 		});
 
 		test('should set hasUpload to true after successful upload', () => {
 			WPDocumentRevisions.hasUpload = false;
 			WPDocumentRevisions.window = {
 				document: {
-					getElementById: jest.fn(() => ({ value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() })),
+					getElementById: jest.fn(() => (mockWindowEl())),
 				},
 				tb_remove: jest.fn(),
 			};
@@ -548,7 +564,7 @@ describe('WPDocumentRevisions', () => {
 			WPDocumentRevisions.hasUpload = false;
 			WPDocumentRevisions.window = {
 				document: {
-					getElementById: jest.fn(() => ({ value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() })),
+					getElementById: jest.fn(() => (mockWindowEl())),
 				},
 				tb_remove: jest.fn(),
 			};
@@ -561,48 +577,23 @@ describe('WPDocumentRevisions', () => {
 
 		test('should display error when attachmentID contains error string', () => {
 			WPDocumentRevisions.hasUpload = false;
-			const errorHtml = '<div class="error">Upload failed</div>';
-			const mockMediaItem = { innerHTML: '' };
-			document.querySelector = jest.fn((sel) => {
-				if (sel === '.media-item') return mockMediaItem;
-				return null;
-			});
-
-			WPDocumentRevisions.postDocumentUpload('test.pdf', errorHtml);
-
-			expect(mockMediaItem.innerHTML).toBe(errorHtml);
-		});
-
-		test('should update permalink with file extension after upload', () => {
-			WPDocumentRevisions.hasUpload = false;
-
-			const mockPermalink = {
-				innerHTML: 'http://example.com/doc</span>.pdf@',
-			};
-
-			const defaultEl = { value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() };
-
+			WPDocumentRevisions.showUploadError = jest.fn();
 			WPDocumentRevisions.window = {
-				document: {
-					getElementById: jest.fn((id) => {
-						if (id === 'sample-permalink') return mockPermalink;
-						return defaultEl;
-					}),
-				},
 				tb_remove: jest.fn(),
+				document: { getElementById: jest.fn(() => null) },
 			};
-			WPDocumentRevisions.enableSubmit = jest.fn();
 
-			WPDocumentRevisions.postDocumentUpload('doc', '123');
+			WPDocumentRevisions.postDocumentUpload('test.pdf', 'error: Upload failed');
 
-			expect(mockPermalink.innerHTML).toContain('.docx');
+			expect(WPDocumentRevisions.window.tb_remove).toHaveBeenCalled();
+			expect(WPDocumentRevisions.showUploadError).toHaveBeenCalledWith('error: Upload failed');
 		});
 
 		test('should set post_content to WPDR comment format on upload', () => {
 			WPDocumentRevisions.hasUpload = false;
 
 			const postContentEl = { value: '' };
-			const defaultEl = { value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() };
+			const defaultEl = mockWindowEl();
 
 			WPDocumentRevisions.window = {
 				document: {
@@ -624,7 +615,7 @@ describe('WPDocumentRevisions', () => {
 			WPDocumentRevisions.hasUpload = false;
 
 			const postContentEl = { value: '' };
-			const defaultEl = { value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() };
+			const defaultEl = mockWindowEl();
 
 			WPDocumentRevisions.window = {
 				document: {
@@ -648,7 +639,7 @@ describe('WPDocumentRevisions', () => {
 			WPDocumentRevisions.hasUpload = false;
 
 			const postContentEl = { value: '' };
-			const defaultEl = { value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() };
+			const defaultEl = mockWindowEl();
 
 			WPDocumentRevisions.window = {
 				document: {
@@ -669,31 +660,32 @@ describe('WPDocumentRevisions', () => {
 
 		test('should display error for JSON error response', () => {
 			WPDocumentRevisions.hasUpload = false;
-			const mockMediaItem = { innerHTML: '' };
-			document.querySelector = jest.fn((sel) => {
-				if (sel === '.media-item') return mockMediaItem;
-				return null;
-			});
+			WPDocumentRevisions.showUploadError = jest.fn();
+			WPDocumentRevisions.window = {
+				tb_remove: jest.fn(),
+				document: { getElementById: jest.fn(() => null) },
+			};
 
 			const jsonResponse = JSON.stringify({ success: false, data: { message: 'Upload limit exceeded' } });
 			WPDocumentRevisions.postDocumentUpload('test.pdf', jsonResponse);
 
-			expect(mockMediaItem.innerHTML).toBe('Upload limit exceeded');
+			expect(WPDocumentRevisions.window.tb_remove).toHaveBeenCalled();
+			expect(WPDocumentRevisions.showUploadError).toHaveBeenCalledWith('Upload limit exceeded');
 			expect(WPDocumentRevisions.hasUpload).toBe(false);
 		});
 
 		test('should display error for JSON error response without message property', () => {
 			WPDocumentRevisions.hasUpload = false;
-			const mockMediaItem = { innerHTML: '' };
-			document.querySelector = jest.fn((sel) => {
-				if (sel === '.media-item') return mockMediaItem;
-				return null;
-			});
+			WPDocumentRevisions.showUploadError = jest.fn();
+			WPDocumentRevisions.window = {
+				tb_remove: jest.fn(),
+				document: { getElementById: jest.fn(() => null) },
+			};
 
 			const jsonResponse = JSON.stringify({ success: false, data: 'Something went wrong' });
 			WPDocumentRevisions.postDocumentUpload('test.pdf', jsonResponse);
 
-			expect(mockMediaItem.innerHTML).toBe('Something went wrong');
+			expect(WPDocumentRevisions.showUploadError).toHaveBeenCalledWith('Something went wrong');
 			expect(WPDocumentRevisions.hasUpload).toBe(false);
 		});
 
@@ -701,7 +693,7 @@ describe('WPDocumentRevisions', () => {
 			WPDocumentRevisions.hasUpload = false;
 
 			const postContentEl = { value: '' };
-			const defaultEl = { value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() };
+			const defaultEl = mockWindowEl();
 
 			WPDocumentRevisions.window = {
 				document: {
@@ -858,7 +850,8 @@ describe('WPDocumentRevisions', () => {
 			WPDocumentRevisions.bindPostDocumentUploadCB();
 			WPDocumentRevisions.bindPostDocumentUploadCB();
 
-			expect(mockBind).toHaveBeenCalledTimes(1);
+			// First call binds UploadFile + FileUploaded (2 calls), second call is no-op.
+			expect(mockBind).toHaveBeenCalledTimes(2);
 			expect(WPDocumentRevisions._uploaderBound).toBe(true);
 		});
 
@@ -1078,7 +1071,7 @@ describe('WPDocumentRevisions', () => {
 			WPDocumentRevisions.hasUpload = false;
 			WPDocumentRevisions.window = {
 				document: {
-					getElementById: jest.fn(() => ({ value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() })),
+					getElementById: jest.fn(() => (mockWindowEl())),
 				},
 				tb_remove: jest.fn(),
 			};
@@ -1094,6 +1087,237 @@ describe('WPDocumentRevisions', () => {
 
 			// Should still work because arrow functions ignore call/apply this
 			expect(WPDocumentRevisions.hasUpload).toBe(true);
+		});
+	});
+
+	describe('clearUploadNotices', () => {
+		test('should remove all upload notice elements', () => {
+			const removed = [];
+			const mockEls = {
+				'wpdr-upload-confirm': { parentNode: { removeChild: jest.fn((el) => removed.push('confirm')) } },
+				'wpdr-upload-progress': { parentNode: { removeChild: jest.fn((el) => removed.push('progress')) } },
+				'wpdr-save-first-notice': { parentNode: { removeChild: jest.fn((el) => removed.push('save-first')) } },
+				'wpdr-upload-error': { parentNode: { removeChild: jest.fn((el) => removed.push('error')) } },
+			};
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn((id) => mockEls[id] || null),
+				},
+			};
+
+			WPDocumentRevisions.clearUploadNotices();
+
+			expect(removed).toEqual(['confirm', 'progress', 'save-first', 'error']);
+		});
+
+		test('should handle missing notice elements gracefully', () => {
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn(() => null),
+				},
+			};
+
+			expect(() => {
+				WPDocumentRevisions.clearUploadNotices();
+			}).not.toThrow();
+		});
+	});
+
+	describe('showUploadProgress', () => {
+		test('should insert progress indicator in document metabox', () => {
+			const mockProgress = { id: '', innerHTML: '', style: { cssText: '' } };
+			const mockClearDiv = {};
+			const mockMetabox = {
+				querySelector: jest.fn(() => mockClearDiv),
+				insertBefore: jest.fn(),
+			};
+			WPDocumentRevisions._uploadProgressShown = false;
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn(() => null),
+					querySelector: jest.fn((sel) => {
+						if (sel === '#document .inside') return mockMetabox;
+						return null;
+					}),
+					createElement: jest.fn(() => mockProgress),
+				},
+			};
+			WPDocumentRevisions.clearUploadNotices = jest.fn();
+
+			WPDocumentRevisions.showUploadProgress();
+
+			expect(mockProgress.id).toBe('wpdr-upload-progress');
+			expect(mockProgress.innerHTML).toContain('Uploading');
+			expect(mockMetabox.insertBefore).toHaveBeenCalledWith(mockProgress, mockClearDiv);
+			expect(WPDocumentRevisions._uploadProgressShown).toBe(true);
+		});
+
+		test('should not show progress twice', () => {
+			WPDocumentRevisions._uploadProgressShown = true;
+			WPDocumentRevisions.window = {
+				document: {
+					querySelector: jest.fn(),
+				},
+			};
+
+			WPDocumentRevisions.showUploadProgress();
+
+			expect(WPDocumentRevisions.window.document.querySelector).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('showUploadError', () => {
+		test('should show error notice in parent window', () => {
+			const mockPost = { insertAdjacentHTML: jest.fn() };
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn((id) => {
+						if (id === 'post') return mockPost;
+						return null;
+					}),
+				},
+			};
+			WPDocumentRevisions.clearUploadNotices = jest.fn();
+
+			WPDocumentRevisions.showUploadError('File too large');
+
+			expect(WPDocumentRevisions.clearUploadNotices).toHaveBeenCalled();
+			expect(mockPost.insertAdjacentHTML).toHaveBeenCalledWith(
+				'beforebegin',
+				expect.stringContaining('Upload failed.')
+			);
+			expect(mockPost.insertAdjacentHTML).toHaveBeenCalledWith(
+				'beforebegin',
+				expect.stringContaining('File too large')
+			);
+		});
+
+		test('should escape HTML in error text', () => {
+			const mockPost = { insertAdjacentHTML: jest.fn() };
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn((id) => {
+						if (id === 'post') return mockPost;
+						return null;
+					}),
+				},
+			};
+			WPDocumentRevisions.clearUploadNotices = jest.fn();
+
+			WPDocumentRevisions.showUploadError('<script>alert("xss")</script>');
+
+			const html = mockPost.insertAdjacentHTML.mock.calls[0][1];
+			expect(html).not.toContain('<script>');
+			expect(html).toContain('&lt;script&gt;');
+		});
+	});
+
+	describe('postDocumentUpload - error feedback', () => {
+		test('should show error in parent window for JSON error response', () => {
+			WPDocumentRevisions.hasUpload = false;
+			WPDocumentRevisions.showUploadError = jest.fn();
+			WPDocumentRevisions.window = {
+				tb_remove: jest.fn(),
+				document: { getElementById: jest.fn(() => null) },
+			};
+
+			const jsonResponse = JSON.stringify({ success: false, data: { message: 'Upload limit exceeded' } });
+			WPDocumentRevisions.postDocumentUpload('test.pdf', jsonResponse);
+
+			expect(WPDocumentRevisions.window.tb_remove).toHaveBeenCalled();
+			expect(WPDocumentRevisions.showUploadError).toHaveBeenCalledWith('Upload limit exceeded');
+		});
+
+		test('should show error in parent window for legacy error string', () => {
+			WPDocumentRevisions.hasUpload = false;
+			WPDocumentRevisions.showUploadError = jest.fn();
+			WPDocumentRevisions.window = {
+				tb_remove: jest.fn(),
+				document: { getElementById: jest.fn(() => null) },
+			};
+
+			WPDocumentRevisions.postDocumentUpload('test.pdf', 'error: upload failed');
+
+			expect(WPDocumentRevisions.window.tb_remove).toHaveBeenCalled();
+			expect(WPDocumentRevisions.showUploadError).toHaveBeenCalledWith('error: upload failed');
+		});
+	});
+
+	describe('postDocumentUpload - null docID guard', () => {
+		test('should show error when attachmentID has no numeric ID', () => {
+			WPDocumentRevisions.hasUpload = false;
+			WPDocumentRevisions.showUploadError = jest.fn();
+			WPDocumentRevisions.window = {
+				tb_remove: jest.fn(),
+				document: { getElementById: jest.fn(() => null) },
+			};
+
+			WPDocumentRevisions.postDocumentUpload('test.pdf', 'not-a-number');
+
+			expect(WPDocumentRevisions.showUploadError).toHaveBeenCalledWith('');
+			expect(WPDocumentRevisions.hasUpload).toBe(false);
+		});
+
+		test('should not corrupt post_content with null docID', () => {
+			WPDocumentRevisions.hasUpload = false;
+			WPDocumentRevisions.showUploadError = jest.fn();
+			const postContentEl = { value: 'original' };
+			WPDocumentRevisions.window = {
+				tb_remove: jest.fn(),
+				document: {
+					getElementById: jest.fn((id) => {
+						if (id === 'post_content') return postContentEl;
+						return null;
+					}),
+				},
+			};
+
+			WPDocumentRevisions.postDocumentUpload('test.pdf', 'abc');
+
+			expect(postContentEl.value).toBe('original');
+		});
+	});
+
+	describe('postDocumentUpload - hasUpload save-first feedback', () => {
+		test('should show save-first notice when hasUpload is already true', () => {
+			WPDocumentRevisions.hasUpload = true;
+			WPDocumentRevisions.clearUploadNotices = jest.fn();
+			const mockPost = { insertAdjacentHTML: jest.fn() };
+			WPDocumentRevisions.window = {
+				tb_remove: jest.fn(),
+				document: {
+					getElementById: jest.fn((id) => {
+						if (id === 'post') return mockPost;
+						return null;
+					}),
+				},
+			};
+
+			WPDocumentRevisions.postDocumentUpload('test.pdf', '123');
+
+			expect(WPDocumentRevisions.window.tb_remove).toHaveBeenCalled();
+			expect(WPDocumentRevisions.clearUploadNotices).toHaveBeenCalled();
+			expect(mockPost.insertAdjacentHTML).toHaveBeenCalledWith(
+				'beforebegin',
+				expect.stringContaining('save the current version')
+			);
+		});
+	});
+
+	describe('bindPostDocumentUploadCB - progress binding', () => {
+		test('should bind UploadFile event for progress indicator', () => {
+			WPDocumentRevisions._uploaderBound = false;
+			const boundEvents = {};
+			global.uploader = {
+				bind: jest.fn((event, cb) => {
+					boundEvents[event] = cb;
+				}),
+			};
+
+			WPDocumentRevisions.bindPostDocumentUploadCB();
+
+			expect(global.uploader.bind).toHaveBeenCalledWith('UploadFile', expect.any(Function));
+			expect(global.uploader.bind).toHaveBeenCalledWith('FileUploaded', expect.any(Function));
 		});
 	});
 });

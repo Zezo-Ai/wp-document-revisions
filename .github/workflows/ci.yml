@@ -169,13 +169,23 @@ jobs:
                 include:
                     - php-versions: '8.0'
                       wp-multisite: 0
+                      wp-version: 'latest'
                     - php-versions: '8.1'
                       wp-multisite: 0
+                      wp-version: 'latest'
                     - php-versions: '8.3'
                       wp-multisite: 0
+                      wp-version: 'latest'
                     - php-versions: '8.0'
                       wp-multisite: 1
-        name: PHP ${{ matrix.php-versions }} Test WP latest MS ${{ matrix.wp-multisite }}
+                      wp-version: 'latest'
+                    - php-versions: '8.0'
+                      wp-multisite: 0
+                      wp-version: '6.4'
+                    - php-versions: '8.0'
+                      wp-multisite: 0
+                      wp-version: '5.9'
+        name: PHP ${{ matrix.php-versions }} WP ${{ matrix.wp-version }} MS ${{ matrix.wp-multisite }}
         steps:
             - name: Start DB
               run: sudo systemctl start mysql
@@ -210,10 +220,10 @@ jobs:
                   path: |
                       /tmp/wordpress
                       /tmp/wordpress-tests-lib
-                  key: wp-test-framework-latest
+                  key: wp-test-framework-${{ matrix.wp-version }}
 
             - name: Install WP Tests
-              run: bash script/install-wp-tests wordpress_test root root 127.0.0.1 latest
+              run: bash script/install-wp-tests wordpress_test root root 127.0.0.1 ${{ matrix.wp-version }}
               env:
                   WP_MULTISITE: ${{ matrix.wp-multisite }}
 

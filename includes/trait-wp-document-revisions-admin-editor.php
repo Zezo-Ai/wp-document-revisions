@@ -463,6 +463,9 @@ trait WP_Document_Revisions_Admin_Editor {
 				'postUploadNotice'    => '<div id="message" class="updated"><p>' . __( 'File uploaded successfully. Add a revision summary below (optional) and press <strong>Update</strong> to save your changes.', 'wp-document-revisions' ) . '</p></div>',
 				'postDesktopNotice'   => '<div id="message" class="update-nag"><p>' . __( 'After you have saved your document in your office software, <a href="#" onClick="location.reload();">reload this page</a> to see your changes.', 'wp-document-revisions' ) . '</p></div>',
 				'uploadConfirmation'  => __( 'New version uploaded. Press Update to save.', 'wp-document-revisions' ),
+				'uploadErrorNotice'   => '<div id="wpdr-upload-error" class="error"><p>' . __( 'Upload failed.', 'wp-document-revisions' ) . '</p></div>',
+				'saveFirstNotice'     => __( 'Please save the current version before uploading another.', 'wp-document-revisions' ),
+				'uploadProgress'      => __( 'Uploading…', 'wp-document-revisions' ),
 				// translators: %s is the title of the document.
 				'lostLockNotice'      => __( 'Your lock on the document %s has been overridden. Any changes will be lost.', 'wp-document-revisions' ),
 				'lockError'           => __( 'An error has occurred, please try reloading the page.', 'wp-document-revisions' ),
