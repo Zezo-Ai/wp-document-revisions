@@ -19,7 +19,7 @@
 
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/editor';
-import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { MediaUploadCheck } from '@wordpress/block-editor';
 import {
 	Button,
 	Spinner,
@@ -27,7 +27,7 @@ import {
 } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useCallback, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 
@@ -171,44 +171,117 @@ function DocumentUploadPanel() {
 		}
 	}, [ attachmentId, isResolving, attachment, createErrorNotice ] );
 
-	const onSelectMedia = ( media ) => {
-		if ( ! media?.id ) {
-			createErrorNotice(
-				__( 'Document selection failed.', 'wp-document-revisions' ),
-				{ isDismissible: true }
+	const onSelectMedia = useCallback(
+		( media ) => {
+			if ( ! media?.id ) {
+				createErrorNotice(
+					__(
+						'Document selection failed.',
+						'wp-document-revisions'
+					),
+					{ isDismissible: true }
+				);
+				return;
+			}
+
+			const oldId = previousAttachmentId;
+			setMeta( { ...meta, document_attachment_id: media.id } );
+			setPreviousAttachmentId( media.id );
+
+			// Show appropriate success notice.
+			const message = oldId
+				? __(
+						'New version selected. Press Update to save.',
+						'wp-document-revisions'
+				  )
+				: __(
+						'Document selected. Press Update to save.',
+						'wp-document-revisions'
+				  );
+			createSuccessNotice( message, {
+				type: 'snackbar',
+				isDismissible: true,
+			} );
+
+			// Fire legacy CustomEvent for backward compatibility.
+			const ext = media.filename
+				? '.' + media.filename.split( '.' ).pop()
+				: '';
+			document.dispatchEvent(
+				new CustomEvent( 'documentUpload', {
+					detail: {
+						attachmentID: String( media.id ),
+						extension: ext,
+					},
+				} )
 			);
+		},
+		[ meta, setMeta, previousAttachmentId, createSuccessNotice, createErrorNotice ]
+	);
+
+	// Custom media frame that auto-closes after a fresh upload.
+	const frameRef = useRef( null );
+
+	const openMediaFrame = useCallback( () => {
+		// Reuse existing frame if already created.
+		if ( frameRef.current ) {
+			frameRef.current.open();
 			return;
 		}
 
-		const oldId = previousAttachmentId;
-		setMeta( { ...meta, document_attachment_id: media.id } );
-		setPreviousAttachmentId( media.id );
-
-		// Show appropriate success notice.
-		const message = oldId
-			? __(
-					'New version selected. Press Update to save.',
-					'wp-document-revisions'
-			  )
-			: __(
-					'Document selected. Press Update to save.',
-					'wp-document-revisions'
-			  );
-		createSuccessNotice( message, {
-			type: 'snackbar',
-			isDismissible: true,
+		const frame = window.wp.media( {
+			title: attachmentId
+				? __( 'Upload New Version', 'wp-document-revisions' )
+				: __( 'Upload Document', 'wp-document-revisions' ),
+			multiple: false,
+			button: {
+				text: __( 'Select', 'wp-document-revisions' ),
+			},
 		} );
 
-		// Fire legacy CustomEvent for backward compatibility.
-		const ext = media.filename
-			? '.' + media.filename.split( '.' ).pop()
-			: '';
-		document.dispatchEvent(
-			new CustomEvent( 'documentUpload', {
-				detail: { attachmentID: String( media.id ), extension: ext },
-			} )
-		);
-	};
+		// Standard select handler (user clicks "Select" button).
+		frame.on( 'select', () => {
+			const selected = frame
+				.state()
+				.get( 'selection' )
+				.first()
+				?.toJSON();
+			if ( selected ) {
+				onSelectMedia( selected );
+			}
+		} );
+
+		// Auto-close: when a file finishes uploading, select it and close.
+		frame.on( 'content:activate:upload', () => {
+			const uploader = frame.uploader?.uploader?.uploader;
+			if ( uploader ) {
+				uploader.bind( 'FileUploaded', ( up, file, response ) => {
+					try {
+						const data = JSON.parse( response.response );
+						if ( data?.success && data?.data?.id ) {
+							onSelectMedia( data.data );
+							frame.close();
+						}
+					} catch ( e ) {
+						// Fall through to manual selection.
+					}
+				} );
+			}
+		} );
+
+		frameRef.current = frame;
+		frame.open();
+	}, [ attachmentId, onSelectMedia ] );
+
+	// Clean up frame on unmount.
+	useEffect( () => {
+		return () => {
+			if ( frameRef.current ) {
+				frameRef.current.dispose();
+				frameRef.current = null;
+			}
+		};
+	}, [] );
 
 	const getFileName = () => {
 		if ( attachment?.title?.raw ) {
@@ -306,26 +379,21 @@ function DocumentUploadPanel() {
 			{ /* Upload / Replace button */ }
 			{ ! isResolving && (
 				<MediaUploadCheck>
-					<MediaUpload
-						onSelect={ onSelectMedia }
-						render={ ( { open } ) => (
-							<Button
-								variant="secondary"
-								onClick={ open }
-								disabled={ isLocked }
-							>
-								{ attachmentId
-									? __(
-											'Upload New Version',
-											'wp-document-revisions'
-									  )
-									: __(
-											'Upload Document',
-											'wp-document-revisions'
-									  ) }
-							</Button>
-						) }
-					/>
+					<Button
+						variant="secondary"
+						onClick={ openMediaFrame }
+						disabled={ isLocked }
+					>
+						{ attachmentId
+							? __(
+									'Upload New Version',
+									'wp-document-revisions'
+							  )
+							: __(
+									'Upload Document',
+									'wp-document-revisions'
+							  ) }
+					</Button>
 				</MediaUploadCheck>
 			) }
 
