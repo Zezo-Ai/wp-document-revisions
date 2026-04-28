@@ -2,6 +2,16 @@
 
 Numbers in brackets show the issue number in https://github.com/wp-document-revisions/wp-document-revisions/issues/
 
+### 4.0.1
+
+#### Bug Fixes
+
+* Fix shortcode TypeError on PHP 8.x when called without attributes
+* Fix E2E tests for hidden editor canvas on document post type
+* Fix REST route arg count assertions in test suite
+* Trim readme.txt description to fit WordPress.org 2,500 word limit
+* Add WordPress Playground `blueprint.json` for live preview on WordPress.org
+
 ### 4.0.0
 
 #### Block Editor Support (Experimental)
