@@ -139,6 +139,10 @@ class WP_Document_Revisions {
 		add_action( 'init', array( &$this, 'register_cpt' ) );
 		add_action( 'init', array( &$this, 'register_ct' ), 2000 ); // note: low priority to allow for edit flow/publishpress support.
 		add_action( 'admin_init', array( &$this, 'initialize_workflow_states' ) );
+
+		// Abilities API (WP 6.9+).
+		add_action( 'wp_abilities_api_categories_init', array( &$this, 'register_ability_category' ) );
+		add_action( 'wp_abilities_api_init', array( &$this, 'register_abilities' ) );
 		// check whether to invoke old or new count method (Change will need #38843 - deal with beta release).
 		global $wp_version;
 		$vers = strpos( $wp_version, '-' );
@@ -286,6 +290,334 @@ class WP_Document_Revisions {
 	 */
 	public function deactivation_hook(): void {
 		flush_rewrite_rules();
+	}
+
+	/**
+	 * Registers the document ability category for the Abilities API.
+	 *
+	 * @since 3.9.1
+	 * @return void
+	 */
+	public function register_ability_category(): void {
+		if ( ! function_exists( 'wp_register_ability_category' ) ) {
+			return;
+		}
+
+		wp_register_ability_category(
+			'wp-document-revisions',
+			array(
+				'label' => __( 'Documents', 'wp-document-revisions' ),
+			)
+		);
+	}
+
+	/**
+	 * Registers document abilities for the Abilities API (WP 6.9+).
+	 *
+	 * Exposes document operations as discoverable abilities for REST clients,
+	 * AI agents, and the WordPress command palette.
+	 *
+	 * @since 3.9.1
+	 * @return void
+	 */
+	public function register_abilities(): void {
+		if ( ! function_exists( 'wp_register_ability' ) ) {
+			return;
+		}
+
+		wp_register_ability(
+			'wp-document-revisions/check-document-access',
+			array(
+				'label'               => __( 'Check Document Access', 'wp-document-revisions' ),
+				'description'         => __( 'Check whether the current user can perform a specific action on a document.', 'wp-document-revisions' ),
+				'category'            => 'wp-document-revisions',
+				'execute_callback'    => array( $this, 'ability_check_document_access' ),
+				'permission_callback' => 'is_user_logged_in',
+				'input_schema'        => array(
+					'type'       => 'object',
+					'properties' => array(
+						'document_id' => array(
+							'type'        => 'integer',
+							'description' => __( 'The document post ID to check access for.', 'wp-document-revisions' ),
+						),
+						'action'      => array(
+							'type'        => 'string',
+							'description' => __( 'The action to check: read, edit, delete, or publish.', 'wp-document-revisions' ),
+							'enum'        => array( 'read', 'edit', 'delete', 'publish' ),
+						),
+					),
+					'required'   => array( 'document_id', 'action' ),
+				),
+				'output_schema'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'allowed' => array(
+							'type'        => 'boolean',
+							'description' => __( 'Whether the user can perform the action.', 'wp-document-revisions' ),
+						),
+					),
+				),
+				'meta'                => array( 'show_in_rest' => true ),
+			)
+		);
+
+		wp_register_ability(
+			'wp-document-revisions/get-document-info',
+			array(
+				'label'               => __( 'Get Document Info', 'wp-document-revisions' ),
+				'description'         => __( 'Retrieve metadata for a document including file type, revision count, and lock status.', 'wp-document-revisions' ),
+				'category'            => 'wp-document-revisions',
+				'execute_callback'    => array( $this, 'ability_get_document_info' ),
+				'permission_callback' => 'is_user_logged_in',
+				'input_schema'        => array(
+					'type'       => 'object',
+					'properties' => array(
+						'document_id' => array(
+							'type'        => 'integer',
+							'description' => __( 'The document post ID.', 'wp-document-revisions' ),
+						),
+					),
+					'required'   => array( 'document_id' ),
+				),
+				'output_schema'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'title'          => array( 'type' => 'string' ),
+						'file_type'      => array( 'type' => 'string' ),
+						'revision_count' => array( 'type' => 'integer' ),
+						'locked_by'      => array( 'type' => array( 'string', 'null' ) ),
+						'status'         => array( 'type' => 'string' ),
+					),
+				),
+				'meta'                => array( 'show_in_rest' => true ),
+			)
+		);
+
+		wp_register_ability(
+			'wp-document-revisions/get-document-revisions',
+			array(
+				'label'               => __( 'Get Document Revisions', 'wp-document-revisions' ),
+				'description'         => __( 'Retrieve the revision history of a document.', 'wp-document-revisions' ),
+				'category'            => 'wp-document-revisions',
+				'execute_callback'    => array( $this, 'ability_get_document_revisions' ),
+				'permission_callback' => 'is_user_logged_in',
+				'input_schema'        => array(
+					'type'       => 'object',
+					'properties' => array(
+						'document_id' => array(
+							'type'        => 'integer',
+							'description' => __( 'The document post ID.', 'wp-document-revisions' ),
+						),
+					),
+					'required'   => array( 'document_id' ),
+				),
+				'output_schema'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'revisions' => array(
+							'type'  => 'array',
+							'items' => array(
+								'type'       => 'object',
+								'properties' => array(
+									'id'     => array( 'type' => 'integer' ),
+									'date'   => array( 'type' => 'string' ),
+									'author' => array( 'type' => 'string' ),
+									'log'    => array( 'type' => 'string' ),
+								),
+							),
+						),
+					),
+				),
+				'meta'                => array( 'show_in_rest' => true ),
+			)
+		);
+
+		wp_register_ability(
+			'wp-document-revisions/override-document-lock',
+			array(
+				'label'               => __( 'Override Document Lock', 'wp-document-revisions' ),
+				'description'         => __( 'Override another user\'s lock on a document to allow editing.', 'wp-document-revisions' ),
+				'category'            => 'wp-document-revisions',
+				'execute_callback'    => array( $this, 'ability_override_document_lock' ),
+				'permission_callback' => function () {
+					return current_user_can( 'override_document_lock' );
+				},
+				'input_schema'        => array(
+					'type'       => 'object',
+					'properties' => array(
+						'document_id' => array(
+							'type'        => 'integer',
+							'description' => __( 'The document post ID to unlock.', 'wp-document-revisions' ),
+						),
+					),
+					'required'   => array( 'document_id' ),
+				),
+				'output_schema'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'success'       => array( 'type' => 'boolean' ),
+						'previous_lock' => array( 'type' => array( 'string', 'null' ) ),
+					),
+				),
+				'meta'                => array( 'show_in_rest' => true ),
+			)
+		);
+	}
+
+	/**
+	 * Ability callback: Check if the current user can perform an action on a document.
+	 *
+	 * @since 3.9.1
+	 * @param array $input Input containing document_id and action.
+	 * @return array Result with 'allowed' boolean.
+	 */
+	public function ability_check_document_access( array $input ): array {
+		$document_id = (int) $input['document_id'];
+		$action      = $input['action'];
+		$post        = get_post( $document_id );
+
+		if ( ! $post || 'document' !== $post->post_type ) {
+			return array( 'allowed' => false );
+		}
+
+		$cap_map = array(
+			'read'    => 'read_document',
+			'edit'    => 'edit_document',
+			'delete'  => 'delete_document',
+			'publish' => 'publish_documents',
+		);
+
+		$cap = isset( $cap_map[ $action ] ) ? $cap_map[ $action ] : 'read_document';
+
+		// For meta caps (read/edit/delete), pass the post ID for object-level checks.
+		if ( 'publish' === $action ) {
+			$allowed = current_user_can( $cap );
+		} else {
+			$allowed = current_user_can( $cap, $document_id );
+		}
+
+		return array( 'allowed' => $allowed );
+	}
+
+	/**
+	 * Ability callback: Get document metadata.
+	 *
+	 * @since 3.9.1
+	 * @param array $input Input containing document_id.
+	 * @return array|WP_Error Document info or error.
+	 */
+	public function ability_get_document_info( array $input ) {
+		$document_id = (int) $input['document_id'];
+		$post        = get_post( $document_id );
+
+		if ( ! $post || 'document' !== $post->post_type ) {
+			return new WP_Error(
+				'document_not_found',
+				__( 'Document not found.', 'wp-document-revisions' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( ! current_user_can( 'read_document', $document_id ) ) {
+			return new WP_Error(
+				'document_forbidden',
+				__( 'You do not have permission to view this document.', 'wp-document-revisions' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$revisions = $this->get_revisions( $document_id );
+		$lock      = $this->get_document_lock( $document_id );
+		$file_type = $this->get_file_type( $post );
+
+		return array(
+			'title'          => $post->post_title,
+			'file_type'      => $file_type,
+			'revision_count' => is_array( $revisions ) ? count( $revisions ) : 0,
+			'locked_by'      => $lock ? $lock : null,
+			'status'         => $post->post_status,
+		);
+	}
+
+	/**
+	 * Ability callback: Get document revision history.
+	 *
+	 * @since 3.9.1
+	 * @param array $input Input containing document_id.
+	 * @return array|WP_Error Revision list or error.
+	 */
+	public function ability_get_document_revisions( array $input ) {
+		$document_id = (int) $input['document_id'];
+		$post        = get_post( $document_id );
+
+		if ( ! $post || 'document' !== $post->post_type ) {
+			return new WP_Error(
+				'document_not_found',
+				__( 'Document not found.', 'wp-document-revisions' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( ! current_user_can( 'read_document_revisions' ) ) {
+			return new WP_Error(
+				'revisions_forbidden',
+				__( 'You do not have permission to view document revisions.', 'wp-document-revisions' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$revisions = $this->get_revisions( $document_id );
+		$result    = array();
+
+		if ( is_array( $revisions ) ) {
+			foreach ( $revisions as $revision ) {
+				$author   = get_userdata( $revision->post_author );
+				$result[] = array(
+					'id'     => $revision->ID,
+					'date'   => $revision->post_date,
+					'author' => $author ? $author->display_name : __( 'Unknown', 'wp-document-revisions' ),
+					'log'    => $revision->post_excerpt,
+				);
+			}
+		}
+
+		return array( 'revisions' => $result );
+	}
+
+	/**
+	 * Ability callback: Override a document lock.
+	 *
+	 * @since 3.9.1
+	 * @param array $input Input containing document_id.
+	 * @return array|WP_Error Result or error.
+	 */
+	public function ability_override_document_lock( array $input ) {
+		$document_id = (int) $input['document_id'];
+		$post        = get_post( $document_id );
+
+		if ( ! $post || 'document' !== $post->post_type ) {
+			return new WP_Error(
+				'document_not_found',
+				__( 'Document not found.', 'wp-document-revisions' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$previous_lock = $this->get_document_lock( $document_id );
+
+		if ( ! $previous_lock ) {
+			return array(
+				'success'       => true,
+				'previous_lock' => null,
+			);
+		}
+
+		delete_post_meta( $document_id, '_edit_lock' );
+
+		return array(
+			'success'       => true,
+			'previous_lock' => $previous_lock,
+		);
 	}
 
 	/**
