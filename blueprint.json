@@ -1,0 +1,21 @@
+{
+	"landingPage": "/wp-admin/edit.php?post_type=document",
+	"preferredVersions": {
+		"php": "8.0",
+		"wp": "latest"
+	},
+	"steps": [
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org",
+				"slug": "wp-document-revisions"
+			}
+		},
+		{
+			"step": "login",
+			"username": "admin",
+			"password": "password"
+		}
+	]
+}
