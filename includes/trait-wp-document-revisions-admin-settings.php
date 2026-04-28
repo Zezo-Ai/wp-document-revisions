@@ -598,7 +598,13 @@ trait WP_Document_Revisions_Admin_Settings {
 			<script type="text/javascript">
 				window.addEventListener('load', function() {
 					if ( typeof window.WPDocumentRevisions === "undefined" ) {
-						window.WPDocumentRevisions = new WPDocumentRevisions();
+						var WPDRClass = window.WPDocumentRevisionsClass || (window.parent && window.parent.WPDocumentRevisionsClass);
+						if ( typeof WPDRClass === "function" ) {
+							window.WPDocumentRevisions = new WPDRClass();
+						}
+					}
+					if ( window.WPDocumentRevisions && typeof window.WPDocumentRevisions.bindPostDocumentUploadCB === "function" ) {
+						window.WPDocumentRevisions.bindPostDocumentUploadCB();
 					}
 				});
 			</script>

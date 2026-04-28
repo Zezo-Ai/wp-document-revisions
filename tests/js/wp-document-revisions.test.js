@@ -619,6 +619,106 @@ describe('WPDocumentRevisions', () => {
 
 			expect(postContentEl.value).toBe('<!-- WPDR 456 -->');
 		});
+
+		test('should parse JSON success response from WordPress 6.9+ async-upload', () => {
+			WPDocumentRevisions.hasUpload = false;
+
+			const postContentEl = { value: '' };
+			const defaultEl = { value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() };
+
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn((id) => {
+						if (id === 'post_content') return postContentEl;
+						return defaultEl;
+					}),
+				},
+				tb_remove: jest.fn(),
+			};
+			WPDocumentRevisions.enableSubmit = jest.fn();
+
+			const jsonResponse = JSON.stringify({ success: true, data: { id: 789, title: 'test-file' } });
+			WPDocumentRevisions.postDocumentUpload('doc.pdf', jsonResponse);
+
+			expect(postContentEl.value).toBe('<!-- WPDR 789 -->');
+			expect(WPDocumentRevisions.hasUpload).toBe(true);
+		});
+
+		test('should parse JSON success response with whitespace', () => {
+			WPDocumentRevisions.hasUpload = false;
+
+			const postContentEl = { value: '' };
+			const defaultEl = { value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() };
+
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn((id) => {
+						if (id === 'post_content') return postContentEl;
+						return defaultEl;
+					}),
+				},
+				tb_remove: jest.fn(),
+			};
+			WPDocumentRevisions.enableSubmit = jest.fn();
+
+			const jsonResponse = '  \n' + JSON.stringify({ success: true, data: { id: 42 } }) + '  \n';
+			WPDocumentRevisions.postDocumentUpload('doc.pdf', jsonResponse);
+
+			expect(postContentEl.value).toBe('<!-- WPDR 42 -->');
+		});
+
+		test('should display error for JSON error response', () => {
+			WPDocumentRevisions.hasUpload = false;
+			const mockMediaItem = { innerHTML: '' };
+			document.querySelector = jest.fn((sel) => {
+				if (sel === '.media-item') return mockMediaItem;
+				return null;
+			});
+
+			const jsonResponse = JSON.stringify({ success: false, data: { message: 'Upload limit exceeded' } });
+			WPDocumentRevisions.postDocumentUpload('test.pdf', jsonResponse);
+
+			expect(mockMediaItem.innerHTML).toBe('Upload limit exceeded');
+			expect(WPDocumentRevisions.hasUpload).toBe(false);
+		});
+
+		test('should display error for JSON error response without message property', () => {
+			WPDocumentRevisions.hasUpload = false;
+			const mockMediaItem = { innerHTML: '' };
+			document.querySelector = jest.fn((sel) => {
+				if (sel === '.media-item') return mockMediaItem;
+				return null;
+			});
+
+			const jsonResponse = JSON.stringify({ success: false, data: 'Something went wrong' });
+			WPDocumentRevisions.postDocumentUpload('test.pdf', jsonResponse);
+
+			expect(mockMediaItem.innerHTML).toBe('Something went wrong');
+			expect(WPDocumentRevisions.hasUpload).toBe(false);
+		});
+
+		test('should still handle legacy numeric attachment ID', () => {
+			WPDocumentRevisions.hasUpload = false;
+
+			const postContentEl = { value: '' };
+			const defaultEl = { value: '', style: { display: '' }, innerHTML: '', insertAdjacentHTML: jest.fn() };
+
+			WPDocumentRevisions.window = {
+				document: {
+					getElementById: jest.fn((id) => {
+						if (id === 'post_content') return postContentEl;
+						return defaultEl;
+					}),
+				},
+				tb_remove: jest.fn(),
+			};
+			WPDocumentRevisions.enableSubmit = jest.fn();
+
+			WPDocumentRevisions.postDocumentUpload('doc.pdf', '123');
+
+			expect(postContentEl.value).toBe('<!-- WPDR 123 -->');
+			expect(WPDocumentRevisions.hasUpload).toBe(true);
+		});
 	});
 
 	describe('checkUpdate', () => {
@@ -718,6 +818,10 @@ describe('WPDocumentRevisions', () => {
 	});
 
 	describe('bindPostDocumentUploadCB', () => {
+		beforeEach(() => {
+			WPDocumentRevisions._uploaderBound = false;
+		});
+
 		test('should return early if uploader is undefined', () => {
 			global.uploader = undefined;
 
@@ -743,6 +847,33 @@ describe('WPDocumentRevisions', () => {
 			WPDocumentRevisions.bindPostDocumentUploadCB();
 
 			expect(mockBind).toHaveBeenCalledWith('FileUploaded', expect.any(Function));
+		});
+
+		test('should not bind twice when called multiple times', () => {
+			const mockBind = jest.fn();
+			global.uploader = {
+				bind: mockBind,
+			};
+
+			WPDocumentRevisions.bindPostDocumentUploadCB();
+			WPDocumentRevisions.bindPostDocumentUploadCB();
+
+			expect(mockBind).toHaveBeenCalledTimes(1);
+			expect(WPDocumentRevisions._uploaderBound).toBe(true);
+		});
+
+		test('should succeed on retry after uploader becomes available', () => {
+			const mockBind = jest.fn();
+
+			global.uploader = undefined;
+			WPDocumentRevisions.bindPostDocumentUploadCB();
+			expect(WPDocumentRevisions._uploaderBound).toBeFalsy();
+
+			global.uploader = { bind: mockBind };
+			WPDocumentRevisions.bindPostDocumentUploadCB();
+
+			expect(mockBind).toHaveBeenCalledWith('FileUploaded', expect.any(Function));
+			expect(WPDocumentRevisions._uploaderBound).toBe(true);
 		});
 	});
 

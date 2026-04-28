@@ -4,6 +4,9 @@
 	const SUBMIT_BUTTONS =
 		'#submitpost button, #submitpost [type="submit"], #submitpost [type="button"]';
 
+	// Expose class globally so bind_upload_cb inline script can create instances.
+	window.WPDocumentRevisionsClass = null;
+
 	class WPDocumentRevisions {
 		hasUpload = false;
 		secure = 'https:' === window.location.protocol;
@@ -214,13 +217,14 @@
 		}
 
 		bindPostDocumentUploadCB = () => {
+			if (this._uploaderBound) {
+				return;
+			}
 			if (typeof uploader === 'undefined' || uploader === null) {
 				return;
 			}
+			this._uploaderBound = true;
 			return uploader.bind('FileUploaded', (up, file, response) => {
-				if (response.response.match('media-upload-error')) {
-					return;
-				}
 				return this.postDocumentUpload(file.name, response.response);
 			});
 		}
@@ -311,6 +315,28 @@
 		};
 
 		postDocumentUpload = (file, attachmentID) => {
+			// Normalize JSON responses from WordPress 6.9+ async-upload.php.
+			if (typeof attachmentID === 'string') {
+				const trimmed = attachmentID.trim();
+				if (trimmed.charAt(0) === '{') {
+					try {
+						const json = JSON.parse(trimmed);
+						if (json.success && json.data && json.data.id) {
+							attachmentID = String(json.data.id);
+						} else {
+							const msg = (json.data && json.data.message) || json.data || attachmentID;
+							const mediaItem = document.querySelector('.media-item');
+							if (mediaItem) {
+								mediaItem.innerHTML = String(msg);
+							}
+							return;
+						}
+					} catch (e) {
+						// Not valid JSON, fall through to legacy handling.
+					}
+				}
+			}
+
 			if (typeof attachmentID === 'string' && attachmentID.indexOf('error') !== -1) {
 				const mediaItem = document.querySelector('.media-item');
 				if (mediaItem) {
@@ -341,6 +367,25 @@
 			const post = wDoc.getElementById('post');
 			if (post) {
 				post.insertAdjacentHTML('beforebegin', wp_document_revisions.postUploadNotice);
+			}
+			// Show upload confirmation in the document metabox.
+			const docMetabox = typeof wDoc.querySelector === 'function'
+				? wDoc.querySelector('#document .inside')
+				: null;
+			if (docMetabox) {
+				const uploadConfirm = wDoc.createElement('p');
+				uploadConfirm.id = 'wpdr-upload-confirm';
+				uploadConfirm.innerHTML = '<strong>&#10003; ' +
+					(wp_document_revisions.uploadConfirmation || 'New version uploaded.') +
+					'</strong>';
+				uploadConfirm.style.cssText = 'color:#00a32a;margin:8px 0;';
+				// Insert before the "clear" div at the end.
+				const clearDiv = docMetabox.querySelector('.clear');
+				if (clearDiv) {
+					docMetabox.insertBefore(uploadConfirm, clearDiv);
+				} else {
+					docMetabox.appendChild(uploadConfirm);
+				}
 			}
 			this.enableSubmit();
 			const samplePermalink = wDoc.getElementById('sample-permalink');
@@ -379,6 +424,8 @@
 			}
 		};
 	}
+
+	window.WPDocumentRevisionsClass = WPDocumentRevisions;
 
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', () => {
