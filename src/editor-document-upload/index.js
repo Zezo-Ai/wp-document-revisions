@@ -418,7 +418,220 @@ function DocumentUploadPanel() {
 	);
 }
 
+/**
+ * Revision Log panel for the block editor sidebar.
+ *
+ * Fetches document revisions from the REST API and displays them
+ * in a table matching the classic editor's Revision Log metabox.
+ */
+function RevisionLogPanel() {
+	const postType = useSelect(
+		( select ) => select( 'core/editor' ).getCurrentPostType(),
+		[]
+	);
+
+	const postId = useSelect(
+		( select ) => select( 'core/editor' ).getCurrentPostId(),
+		[]
+	);
+
+	if ( postType !== 'document' || ! postId ) {
+		return null;
+	}
+
+	const [ revisions, setRevisions ] = useState( null );
+	const [ loading, setLoading ] = useState( true );
+
+	// Refresh revision list when post is saved.
+	const isSaving = useSelect(
+		( select ) => select( 'core/editor' ).isSavingPost(),
+		[]
+	);
+	const wasSaving = useRef( false );
+
+	useEffect( () => {
+		// Fetch on mount or after a save completes.
+		if ( wasSaving.current && ! isSaving ) {
+			// Post just finished saving — refetch.
+			fetchRevisions();
+		}
+		wasSaving.current = isSaving;
+	}, [ isSaving ] ); // eslint-disable-line react-hooks/exhaustive-deps
+
+	const fetchRevisions = useCallback( () => {
+		setLoading( true );
+		const restBase =
+			window.wpDocumentRevisions?.restBase || 'documents';
+		window.wp
+			.apiFetch( {
+				path: `/wp/v2/${ restBase }/${ postId }/revisions?per_page=20&context=edit`,
+			} )
+			.then( ( data ) => {
+				setRevisions( data );
+				setLoading( false );
+			} )
+			.catch( () => {
+				setRevisions( [] );
+				setLoading( false );
+			} );
+	}, [ postId ] );
+
+	// Initial fetch.
+	useEffect( () => {
+		fetchRevisions();
+	}, [ fetchRevisions ] );
+
+	// Resolve author display names from user IDs.
+	const authorNames = useSelect(
+		( select ) => {
+			if ( ! revisions || revisions.length === 0 ) {
+				return {};
+			}
+			const names = {};
+			revisions.forEach( ( rev ) => {
+				if ( rev.author && ! names[ rev.author ] ) {
+					const user = select( 'core' ).getUser( rev.author );
+					names[ rev.author ] = user?.name || '';
+				}
+			} );
+			return names;
+		},
+		[ revisions ]
+	);
+	const formatDate = ( dateStr ) => {
+		const date = new Date( dateStr );
+		const now = new Date();
+		const diffMs = now - date;
+		const diffMins = Math.floor( diffMs / 60000 );
+
+		if ( diffMins < 1 ) {
+			return __( 'just now', 'wp-document-revisions' );
+		}
+		if ( diffMins < 60 ) {
+			return diffMins + ' ' + __( 'min ago', 'wp-document-revisions' );
+		}
+		const diffHours = Math.floor( diffMins / 60 );
+		if ( diffHours < 24 ) {
+			return (
+				diffHours +
+				' ' +
+				( diffHours === 1
+					? __( 'hour ago', 'wp-document-revisions' )
+					: __( 'hours ago', 'wp-document-revisions' ) )
+			);
+		}
+		const diffDays = Math.floor( diffHours / 24 );
+		if ( diffDays < 30 ) {
+			return (
+				diffDays +
+				' ' +
+				( diffDays === 1
+					? __( 'day ago', 'wp-document-revisions' )
+					: __( 'days ago', 'wp-document-revisions' ) )
+			);
+		}
+		return date.toLocaleDateString();
+	};
+
+	return (
+		<PluginDocumentSettingPanel
+			name="wp-document-revisions-revision-log"
+			title={ __( 'Revision Log', 'wp-document-revisions' ) }
+			className="wp-document-revisions-revision-log-panel"
+		>
+			{ loading && <Spinner /> }
+			{ ! loading && ( ! revisions || revisions.length === 0 ) && (
+				<p style={ { color: '#757575', fontStyle: 'italic' } }>
+					{ __(
+						'No revisions yet.',
+						'wp-document-revisions'
+					) }
+				</p>
+			) }
+			{ ! loading && revisions && revisions.length > 0 && (
+				<table
+					className="wp-document-revisions-revision-table"
+					style={ {
+						width: '100%',
+						borderCollapse: 'collapse',
+						fontSize: '12px',
+					} }
+				>
+					<thead>
+						<tr>
+							<th
+								style={ {
+									textAlign: 'left',
+									borderBottom: '1px solid #ddd',
+									padding: '4px 4px 4px 0',
+								} }
+							>
+								{ __( 'Modified', 'wp-document-revisions' ) }
+							</th>
+							<th
+								style={ {
+									textAlign: 'left',
+									borderBottom: '1px solid #ddd',
+									padding: '4px',
+								} }
+							>
+								{ __( 'User', 'wp-document-revisions' ) }
+							</th>
+							<th
+								style={ {
+									textAlign: 'left',
+									borderBottom: '1px solid #ddd',
+									padding: '4px',
+								} }
+							>
+								{ __( 'Summary', 'wp-document-revisions' ) }
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{ revisions.map( ( rev ) => (
+							<tr key={ rev.id }>
+								<td
+									style={ {
+										padding: '4px 4px 4px 0',
+										whiteSpace: 'nowrap',
+									} }
+								>
+									{ formatDate( rev.date ) }
+								</td>
+								<td style={ { padding: '4px' } }>
+									{ authorNames[ rev.author ] ||
+										'—' }
+								</td>
+								<td
+									style={ {
+										padding: '4px',
+										color: rev.excerpt?.raw
+											? 'inherit'
+											: '#757575',
+									} }
+								>
+									{ rev.excerpt?.raw ||
+										__(
+											'—',
+											'wp-document-revisions'
+										) }
+								</td>
+							</tr>
+						) ) }
+					</tbody>
+				</table>
+			) }
+		</PluginDocumentSettingPanel>
+	);
+}
+
 registerPlugin( 'wp-document-revisions-upload', {
 	render: DocumentUploadPanel,
 	icon: 'media-document',
+} );
+
+registerPlugin( 'wp-document-revisions-revision-log', {
+	render: RevisionLogPanel,
+	icon: 'backup',
 } );

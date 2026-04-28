@@ -454,6 +454,15 @@ trait WP_Document_Revisions_Admin_Editor {
 					true
 				);
 				wp_set_script_translations( 'wp-document-revisions-editor', 'wp-document-revisions' );
+				wp_add_inline_script(
+					'wp-document-revisions-editor',
+					'window.wpDocumentRevisions = ' . wp_json_encode(
+						array(
+							'restBase' => $wpdr->document_slug(),
+						)
+					) . ';',
+					'before'
+				);
 			}
 		} else {
 			// Classic editor: enqueue the existing admin JS with localized strings.
