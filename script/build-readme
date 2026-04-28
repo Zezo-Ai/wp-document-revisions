@@ -4,6 +4,9 @@ exclude = %w[README header _config.yml CODE_OF_CONDUCT CONTRIBUTING data-structu
 docs_url = "https://wp-document-revisions.github.io/wp-document-revisions/"
 output = File.open("./docs/header.md").read
 
+# Add Description section header after the short description
+output << "\n## Description\n"
+
 # Remove title, badge, and description from README
 readme = File.open("./docs/README.md").read
 readme = "\n#" + readme.split("#")[2..-1].join("#")
