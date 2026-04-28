@@ -738,6 +738,11 @@ class WP_Document_Revisions {
 			$args['rest_base']    = $this->document_slug();
 		}
 
+		// Add excerpt support when block editor is enabled (used for Revision Summary).
+		if ( apply_filters( 'document_use_block_editor', false ) ) {
+			$args['supports'][] = 'excerpt';
+		}
+
 		// Ordinarily read_post (read_document) maps to read, but if read not to be used, we need to map to primitive read_documents.
 		/**
 		 * Filters the users capacities to require read (or read_document) capability.
