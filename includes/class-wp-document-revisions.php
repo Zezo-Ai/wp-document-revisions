@@ -1174,16 +1174,14 @@ class WP_Document_Revisions {
 	 * Information needs to be hidden when REST is used.
 	 */
 	public function manage_rest(): void {
-		$obj = get_post_type_object( 'document' );
-		if ( ! $obj->show_in_rest ) {
-			return;
+		if ( ! class_exists( 'WP_Document_Revisions_Manage_Rest' ) ) {
+			include_once __DIR__ . '/class-wp-document-revisions-manage-rest.php';
 		}
 
+		// Always initialize REST management to ensure document attachments
+		// are cleaned via /wp/v2/media/ even when document REST is disabled.
 		global $wpdr_mr;
 		if ( ! $wpdr_mr ) {
-			if ( ! class_exists( 'WP_Document_Revisions_Manage_Rest' ) ) {
-				include_once __DIR__ . '/class-wp-document-revisions-manage-rest.php';
-			}
 			$wpdr_mr = new WP_Document_Revisions_Manage_Rest( $this );
 		}
 	}

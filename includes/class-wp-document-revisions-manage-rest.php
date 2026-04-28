@@ -172,6 +172,13 @@ class WP_Document_Revisions_Manage_Rest {
 		// Possibly remove attachment.
 		if ( ! current_user_can( 'edit_document', $post->ID ) ) {
 			$response->remove_link( 'https://api.w.org/attachment' );
+
+			// Hide attachment ID meta from non-editors to prevent attachment enumeration.
+			$data = $response->get_data();
+			if ( isset( $data['meta']['document_attachment_id'] ) ) {
+				$data['meta']['document_attachment_id'] = 0;
+				$response->set_data( $data );
+			}
 		}
 
 		// Block editor: sync meta from content and strip WPDR comment from raw content.
@@ -220,6 +227,13 @@ class WP_Document_Revisions_Manage_Rest {
 			);
 		}
 
+		// Strip internal WPDR attachment comment from revision content.
+		$data = $response->get_data();
+		if ( isset( $data['content']['raw'] ) ) {
+			$data['content']['raw'] = preg_replace( '/<!-- WPDR \s*\d+ -->/', '', $data['content']['raw'] );
+			$response->set_data( $data );
+		}
+
 		return $response;
 	}
 
@@ -247,40 +261,24 @@ class WP_Document_Revisions_Manage_Rest {
 		}
 
 		// media always thinks that the attachments are in media directory. We may need to change it.
-		// protect various fields.
-		$response->data['slug']              = __( '<!-- protected -->', 'wp-document-revisions' );
-		$response->data['title']['rendered'] = __( '<!-- protected -->', 'wp-document-revisions' );
-		// description may leak the slug as generated images would be built using the slug name.
-		$response->data['description']['rendered'] = __( '<!-- protected -->', 'wp-document-revisions' );
-
-		// deal with meta_data - media_details).
-		if ( isset( $response->data['media_details'] ) ) {
-			$wpdr    = self::$parent;
-			$std_dir = $wpdr::$wp_default_dir['basedir'];
-			$doc_dir = $wpdr->document_upload_dir();
-
-			if ( ! ( $response->data['media_details'] instanceof stdClass ) ) {
-				if ( ! array_key_exists( 'wpdr_hidden', $response->data['media_details'] ) && false === get_post_meta( $post->ID, '_wpdr_meta_hidden', true ) ) {
-					// cannot trust the metadata, treat as not present.
-					$response->data['media_details'] = new stdClass();
-				} elseif ( $doc_dir !== $std_dir ) {
-					// need to correct link.
-					if ( isset( $response->data['media_details']['sizes'] ) ) {
-						$block = $response->data['media_details']['sizes'];
-						require_once ABSPATH . '/wp-admin/includes/file.php';
-						$home    = get_home_path();
-						$std_dir = trailingslashit( site_url() ) . str_replace( $home, '', $std_dir );
-						$doc_dir = trailingslashit( site_url() ) . str_replace( $home, '', $doc_dir );
-						foreach ( $block as $size => $sizeinfo ) {
-							if ( isset( $sizeinfo['source_url'] ) ) {
-								$block[ $size ]['source_url'] = str_replace( $std_dir, $doc_dir, $sizeinfo['source_url'] );
-							}
-						}
-						$response->data['media_details']['sizes'] = $block;
-					}
-				}
-			}
+		// protect various fields — prevent leaking MD5-hashed filenames, file paths, and URLs.
+		$protected                                 = __( '<!-- protected -->', 'wp-document-revisions' );
+		$response->data['slug']                    = $protected;
+		$response->data['source_url']              = '';
+		$response->data['title']['rendered']       = $protected;
+		$response->data['title']['raw']            = $protected;
+		$response->data['description']['rendered'] = $protected;
+		$response->data['description']['raw']      = $protected;
+		if ( isset( $response->data['guid']['rendered'] ) ) {
+			$response->data['guid']['rendered'] = '';
 		}
+		if ( isset( $response->data['guid']['raw'] ) ) {
+			$response->data['guid']['raw'] = '';
+		}
+		$response->data['link'] = '';
+
+		// For non-editors, strip all media details to prevent file path leakage.
+		$response->data['media_details'] = new stdClass();
 
 		return $response;
 	}
@@ -329,6 +327,12 @@ class WP_Document_Revisions_Manage_Rest {
 		}
 
 		if ( $attach_id ) {
+			// Validate the attachment exists and is actually an attachment.
+			$attachment = get_post( $attach_id );
+			if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
+				return $prepared_post;
+			}
+
 			$wpdr    = self::$parent;
 			$content = isset( $prepared_post->post_content ) ? $prepared_post->post_content : '';
 			// Strip any existing WPDR comment to avoid duplicates.
