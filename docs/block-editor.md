@@ -12,9 +12,6 @@ add_filter( 'document_show_in_rest', '__return_true' );
 
 // Enable the block editor for documents.
 add_filter( 'document_use_block_editor', '__return_true' );
-
-// Allow WordPress to use the block editor for document posts.
-add_filter( 'use_block_editor_for_post', '__return_true' );
 ```
 
 Alternatively, you can create a [must-use plugin](https://developer.wordpress.org/advanced-administration/plugins/mu-plugins/) at `wp-content/mu-plugins/enable-block-editor.php`:
@@ -23,10 +20,9 @@ Alternatively, you can create a [must-use plugin](https://developer.wordpress.or
 <?php
 add_filter( 'document_show_in_rest', '__return_true' );
 add_filter( 'document_use_block_editor', '__return_true' );
-add_filter( 'use_block_editor_for_post', '__return_true' );
 ```
 
-All three filters are required. `document_show_in_rest` exposes documents to the REST API, `document_use_block_editor` configures the plugin for block editor compatibility (REST write methods, excerpt support, meta registration), and `use_block_editor_for_post` tells WordPress to load Gutenberg for document posts.
+Both filters are required. `document_show_in_rest` exposes documents to the REST API, and `document_use_block_editor` configures the plugin for block editor compatibility (enables Gutenberg for documents, allows REST write methods, adds excerpt support, and registers post meta).
 
 ## Document Sidebar Panel
 

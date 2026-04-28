@@ -599,9 +599,16 @@ trait WP_Document_Revisions_Admin_Editor {
 	 * @param WP_Post $post             The post being checked.
 	 */
 	public function no_use_block_editor( bool $use_block_editor, WP_Post $post ) {
-		// switch off for documents.
+		// switch off for documents unless document_use_block_editor filter is true.
 		if ( $this->verify_post_type( $post ) ) {
-			return false;
+			/**
+			 * Filters whether documents should use the block editor.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @param bool $use_block_editor Whether to use the block editor for documents.
+			 */
+			return apply_filters( 'document_use_block_editor', false );
 		}
 		return $use_block_editor;
 	}
