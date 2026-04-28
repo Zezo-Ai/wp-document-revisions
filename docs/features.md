@@ -33,6 +33,7 @@
 - Multisite and Windows (XAMPP) support
 - Multiple language support including French, Spanish and German (easily translated to your language)
 - Integration with [Edit Flow](https://editflow.org), PublishPress or PublishPress Statuses.
+- Opt-in [Block Editor (Gutenberg) support](block-editor.md) with document sidebar panel
 - Recently Revised Documents Widget, shortcodes, and templating functions for front-end integration
 
 ### Features Available via the [Code Cookbook](https://github.com/wp-document-revisions/wp-document-revisions-Code-Cookbook)
