@@ -534,6 +534,7 @@ describe('WPDocumentRevisions', () => {
 		test('should return early if hasUpload is already true', () => {
 			WPDocumentRevisions.hasUpload = true;
 			WPDocumentRevisions.window = {
+				WPDocumentRevisions: { hasUpload: false },
 				document: {
 					getElementById: jest.fn(() => mockWindowEl()),
 				},
@@ -1098,6 +1099,7 @@ describe('WPDocumentRevisions', () => {
 				'wpdr-upload-progress': { parentNode: { removeChild: jest.fn((el) => removed.push('progress')) } },
 				'wpdr-save-first-notice': { parentNode: { removeChild: jest.fn((el) => removed.push('save-first')) } },
 				'wpdr-upload-error': { parentNode: { removeChild: jest.fn((el) => removed.push('error')) } },
+				'message': { parentNode: { removeChild: jest.fn((el) => removed.push('message')) } },
 			};
 			WPDocumentRevisions.window = {
 				document: {
@@ -1107,7 +1109,7 @@ describe('WPDocumentRevisions', () => {
 
 			WPDocumentRevisions.clearUploadNotices();
 
-			expect(removed).toEqual(['confirm', 'progress', 'save-first', 'error']);
+			expect(removed).toEqual(['confirm', 'progress', 'save-first', 'error', 'message']);
 		});
 
 		test('should handle missing notice elements gracefully', () => {
@@ -1284,6 +1286,7 @@ describe('WPDocumentRevisions', () => {
 			WPDocumentRevisions.clearUploadNotices = jest.fn();
 			const mockPost = { insertAdjacentHTML: jest.fn() };
 			WPDocumentRevisions.window = {
+				WPDocumentRevisions: { hasUpload: false },
 				tb_remove: jest.fn(),
 				document: {
 					getElementById: jest.fn((id) => {
@@ -1301,6 +1304,49 @@ describe('WPDocumentRevisions', () => {
 				'beforebegin',
 				expect.stringContaining('save the current version')
 			);
+		});
+
+		test('should block upload when parent instance has hasUpload true', () => {
+			WPDocumentRevisions.hasUpload = false;
+			WPDocumentRevisions.clearUploadNotices = jest.fn();
+			const mockPost = { insertAdjacentHTML: jest.fn() };
+			WPDocumentRevisions.window = {
+				WPDocumentRevisions: { hasUpload: true },
+				tb_remove: jest.fn(),
+				document: {
+					getElementById: jest.fn((id) => {
+						if (id === 'post') return mockPost;
+						return null;
+					}),
+				},
+			};
+
+			WPDocumentRevisions.postDocumentUpload('test.pdf', '456');
+
+			expect(WPDocumentRevisions.window.tb_remove).toHaveBeenCalled();
+			expect(mockPost.insertAdjacentHTML).toHaveBeenCalledWith(
+				'beforebegin',
+				expect.stringContaining('save the current version')
+			);
+		});
+
+		test('should mirror hasUpload to parent instance on successful upload', () => {
+			WPDocumentRevisions.hasUpload = false;
+			const parentInstance = { hasUpload: false };
+			WPDocumentRevisions.window = {
+				WPDocumentRevisions: parentInstance,
+				document: {
+					getElementById: jest.fn(() => mockWindowEl()),
+					querySelector: jest.fn(() => null),
+				},
+				tb_remove: jest.fn(),
+			};
+			WPDocumentRevisions.enableSubmit = jest.fn();
+
+			WPDocumentRevisions.postDocumentUpload('test.pdf', '789');
+
+			expect(WPDocumentRevisions.hasUpload).toBe(true);
+			expect(parentInstance.hasUpload).toBe(true);
 		});
 	});
 

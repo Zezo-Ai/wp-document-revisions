@@ -92,7 +92,7 @@
 
 		clearUploadNotices = () => {
 			const wDoc = this.window.document;
-			const ids = ['wpdr-upload-confirm', 'wpdr-upload-progress', 'wpdr-save-first-notice', 'wpdr-upload-error'];
+			const ids = ['wpdr-upload-confirm', 'wpdr-upload-progress', 'wpdr-save-first-notice', 'wpdr-upload-error', 'message'];
 			ids.forEach((id) => {
 				const el = wDoc.getElementById(id);
 				if (el) {
@@ -405,7 +405,11 @@
 			if (file instanceof Object) {
 				file = file.name.split('.').pop();
 			}
-			if (this.hasUpload) {
+			// Check both local and parent instance — hasUpload on the iframe instance
+			// is lost when ThickBox closes and reopens, so also check the parent.
+			const parentWPDR = this.window.WPDocumentRevisions;
+			const alreadyUploaded = this.hasUpload || (parentWPDR && parentWPDR.hasUpload);
+			if (alreadyUploaded) {
 				this.window.tb_remove();
 				this.clearUploadNotices();
 				const wDoc = this.window.document;
@@ -436,6 +440,10 @@
 				message.style.display = 'none';
 			}
 			this.hasUpload = true;
+			// Mirror to parent so reopening ThickBox still blocks second uploads.
+			if (parentWPDR) {
+				parentWPDR.hasUpload = true;
+			}
 			this.window.tb_remove();
 			const post = wDoc.getElementById('post');
 			if (post) {
