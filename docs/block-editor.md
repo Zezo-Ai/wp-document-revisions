@@ -1,6 +1,6 @@
 # Block Editor (Gutenberg) Support — Experimental
 
-> **⚠️ Experimental Feature:** Block editor support for documents is experimental and opt-in. The classic editor remains the default, recommended, and most thoroughly tested interface. Enable the block editor only if you want to evaluate the new experience and are comfortable with potential rough edges. Please [report any issues](https://github.com/wp-document-revisions/wp-document-revisions/issues) you encounter.
+> **⚠️ Experimental Feature:** Block editor support and the REST API for documents are both experimental and opt-in. The classic editor remains the default, recommended, and most thoroughly tested interface. Enable the block editor only if you want to evaluate the new experience and are comfortable with potential rough edges. Please [report any issues](https://github.com/wp-document-revisions/wp-document-revisions/issues) you encounter.
 
 WP Document Revisions includes experimental support for the WordPress block editor (Gutenberg). By default, documents use the classic editor, which provides a streamlined, purpose-built upload interface. The block editor can be enabled for evaluation when you want to try the newer WordPress editing experience for documents.
 
@@ -27,7 +27,7 @@ add_filter( 'document_use_block_editor', '__return_true' );
 
 To disable the block editor, simply remove these filters.
 
-Both filters are required. `document_show_in_rest` exposes documents to the REST API, and `document_use_block_editor` configures the plugin for block editor compatibility (enables Gutenberg for documents, allows REST write methods, adds excerpt support, and registers post meta).
+Both filters are required. `document_show_in_rest` exposes documents to the WordPress REST API (also experimental), and `document_use_block_editor` configures the plugin for block editor compatibility (enables Gutenberg for documents, allows REST write methods, adds excerpt support, and registers post meta). Enabling `document_show_in_rest` alone provides read-only REST API access without the block editor.
 
 ## Document Sidebar Panel
 

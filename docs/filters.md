@@ -195,9 +195,11 @@ Filters the controlling option to display an edit option against each document.
 
 ## Filter document_show_in_rest
 
+⚠️ **Experimental** — This feature is under active development and may change in future releases.
+
 In: class-wp-document-revisions.php
 
-Filters the show_in_rest parameter from its default value of false. Must be set to true to enable the block editor or REST API access for documents. See [Block Editor Support](block-editor.md).
+Filters the show_in_rest parameter from its default value of false. Must be set to true to enable the block editor or REST API access for documents. Enabling this exposes document data via the WordPress REST API using document permissions. See [Block Editor Support](block-editor.md).
 
 ## Filter document_use_block_editor
 
