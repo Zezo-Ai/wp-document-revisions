@@ -36,6 +36,7 @@ See [**the full list of features**](https://wp-document-revisions.github.io/wp-d
 = 📖 User Documentation =
 
 - **[Frequently Asked Questions](https://wp-document-revisions.github.io/wp-document-revisions/frequently-asked-questions/)** - Common questions answered
+- **[Block Editor Support](https://wp-document-revisions.github.io/wp-document-revisions/block-editor/)** - ⚠️ Experimental Gutenberg support (opt-in)
 - **[Plugin Actions](https://wp-document-revisions.github.io/wp-document-revisions/actions/)** - Available WordPress actions
 - **[Plugin Filters](https://wp-document-revisions.github.io/wp-document-revisions/filters/)** - Available WordPress filters
 - **[Plugin Shortcodes and Widget](https://wp-document-revisions.github.io/wp-document-revisions/shortcodes/)** - Display documents on your site
@@ -127,7 +128,7 @@ See [**the full list of features**](https://wp-document-revisions.github.io/wp-d
 
 - [Edit Flow](https://wordpress.org/plugins/edit-flow/)
 - [PublishPress Statuses](https://wordpress.org/plugins/publishpress-statuses/)
-- [PublishPress Revisions](https://wordpress.org/plugins/publishpress-revisions/) - See the [integration guide](cookbook/publishpress-revisions-integration/) for scheduling document revisions
+- [PublishPress Revisions](https://wp-document-revisions.github.io/wp-document-revisions/https://wordpress.org/plugins/publishpress-revisions/) - See the [integration guide](cookbook/publishpress-revisions-integration/) for scheduling document revisions
 
 
 === Block Editor (Gutenberg) Support — Experimental ===
@@ -413,7 +414,6 @@ Numbers in brackets show the issue number in https://github.com/wp-document-revi
 
 * Fix REST schema validation: use `WP_REST_Server::EDITABLE` constant, add status 400 to `WP_Error` returns
 * Strip WPDR content comment from block editor REST responses
-* Strip WPDR content comment from revision REST responses
 * Populate `document_attachment_id` meta from content in REST edit context
 * Sync meta to content on REST document save
 

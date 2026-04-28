@@ -59,6 +59,7 @@ composer install --no-dev
 - **[Installation Guide](https://wp-document-revisions.github.io/wp-document-revisions/installation/)** - Detailed setup instructions
 - **[FAQ](https://wp-document-revisions.github.io/wp-document-revisions/frequently-asked-questions/)** - Common questions answered
 - **[Features Overview](https://wp-document-revisions.github.io/wp-document-revisions/features/)** - Complete feature list
+- **[Block Editor Support](https://wp-document-revisions.github.io/wp-document-revisions/block-editor/)** - ⚠️ Experimental Gutenberg support (opt-in)
 
 ## 🛠️ Development
 

@@ -33,6 +33,7 @@ See [**the full list of features**](./features.md) for more information.
 ### 📖 User Documentation
 
 - **[Frequently Asked Questions](./frequently-asked-questions.md)** - Common questions answered
+- **[Block Editor Support](./block-editor.md)** - ⚠️ Experimental Gutenberg support (opt-in)
 - **[Plugin Actions](./actions.md)** - Available WordPress actions
 - **[Plugin Filters](./filters.md)** - Available WordPress filters
 - **[Plugin Shortcodes and Widget](./shortcodes.md)** - Display documents on your site
