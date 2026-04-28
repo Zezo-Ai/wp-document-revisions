@@ -10,7 +10,7 @@ parameters:
     ignoreErrors: []
     treatPhpDocTypesAsCertain: false
     parallel:
-        maximumNumberOfProcesses: 1
+        maximumNumberOfProcesses: 4
 
 includes:
     - vendor/szepeviktor/phpstan-wordpress/extension.neon

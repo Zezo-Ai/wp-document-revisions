@@ -8,7 +8,8 @@ Requires at least: 5.0
 Requires PHP: 7.4
 Author: Ben Balter
 Author URI: https://ben.balter.com
-License: GPLv2 or later
+License: GPL-3.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: wp-document-revisions
 Domain Path: /languages
  *
@@ -37,7 +38,7 @@ Domain Path: /languages
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  @copyright 2011-2025
- *  @license GPL v3
+ *  @license GPL-3.0-or-later
  *  @version 3.9.0
  *  @package WP_Document_Revisions
  *  @author Ben Balter <ben@balter.com>
@@ -53,8 +54,9 @@ global $wpdr;
 $wpdr = new WP_Document_Revisions();
 require_once __DIR__ . '/includes/template-functions.php';
 
-// Activation hooks must be relative to the main plugin file.
+// Activation and deactivation hooks must be relative to the main plugin file.
 register_activation_hook( __FILE__, array( $wpdr, 'activation_hook' ) );
+register_deactivation_hook( __FILE__, array( $wpdr, 'deactivation_hook' ) );
 
 // polyfill for str_contains.
 if ( ! function_exists( 'str_contains' ) ) {

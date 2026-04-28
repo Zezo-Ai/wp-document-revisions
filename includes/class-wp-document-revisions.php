@@ -269,10 +269,23 @@ class WP_Document_Revisions {
 	public function activation_hook(): void {
 		$this->add_caps();
 		flush_rewrite_rules();
+		update_option( 'wpdr_db_version', '1.0' );
 		if ( ! current_user_can( 'edit_documents' ) ) {
 			// Unfortunately we cannot create a message directly out of the activation process, so create transient data.
 			set_transient( 'wpdr_activation_issue', get_current_user_id() );
 		}
+	}
+
+	/**
+	 * Callback called when the plugin is deactivated.
+	 *
+	 * Flushes rewrite rules to remove document-specific URL rules.
+	 *
+	 * @since 3.9.1
+	 * @return void
+	 */
+	public function deactivation_hook(): void {
+		flush_rewrite_rules();
 	}
 
 	/**

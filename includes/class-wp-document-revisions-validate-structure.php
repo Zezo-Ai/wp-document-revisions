@@ -207,20 +207,27 @@ class WP_Document_Revisions_Validate_Structure {
 	 * Register route
 	 */
 	public function wpdr_register_route(): void {
-		$args = array(
-			'methods'             => 'PUT',
+		$valid_codes = array( 4, 5, 6, 7, 9, 10, 11, 12 );
+		$args        = array(
+			'methods'             => \WP_REST_Server::EDITABLE,
 			'callback'            => array( &$this, 'correct_document' ),
 			'permission_callback' => array( &$this, 'check_permission' ),
 			'args'                => array(
 				'id'   => array(
+					'type'              => 'integer',
 					'required'          => true,
 					'sanitize_callback' => 'absint',
 				),
 				'code' => array(
+					'type'              => 'integer',
 					'required'          => true,
 					'sanitize_callback' => 'absint',
+					'validate_callback' => function ( $value ) use ( $valid_codes ) {
+						return in_array( (int) $value, $valid_codes, true );
+					},
 				),
 				'parm' => array(
+					'type'              => 'integer',
 					'required'          => true,
 					'sanitize_callback' => 'absint',
 				),
@@ -254,7 +261,7 @@ class WP_Document_Revisions_Validate_Structure {
 			// Attachment exists but post_content does not contain it.
 			// revalidate input values.
 			if ( get_post_field( 'post_parent', $parm, 'db' ) !== $id ) {
-				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ) );
+				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ), array( 'status' => 400 ) );
 			}
 			$content = get_post_field( 'post_content', $id, 'db' );
 			if ( empty( $content ) || is_numeric( $content ) ) {
@@ -286,7 +293,7 @@ class WP_Document_Revisions_Validate_Structure {
 			// revalidate input values.
 			$content = get_post_field( 'post_content', $id, 'db' );
 			if ( false === $wpdr->extract_document_id( $content ) || get_post_field( 'post_parent', $parm, 'db' ) !== $id ) {
-				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ) );
+				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ), array( 'status' => 400 ) );
 			}
 			$end_id = strpos( $content, '>' );
 			if ( false === $end_id ) {
@@ -331,7 +338,7 @@ class WP_Document_Revisions_Validate_Structure {
 
 			// revalidate input (late, but before any damage is done).
 			if ( preg_match( '/^[a-f0-9]{32}$/', $filename ) ) {
-				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ) );
+				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ), array( 'status' => 400 ) );
 			}
 
 			$new_name = md5( $title . microtime() );
@@ -386,7 +393,7 @@ class WP_Document_Revisions_Validate_Structure {
 
 			// revalidate input (late, but before any damage is done).
 			if ( $orig === $file || ! file_exists( $orig ) || file_exists( $file ) ) {
-				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ) );
+				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ), array( 'status' => 400 ) );
 			}
 			$file_dir = dirname( $file );
 			// Use copy and unlink because rename breaks streams.
@@ -427,7 +434,7 @@ class WP_Document_Revisions_Validate_Structure {
 			// guid contains invalid data.
 			// revalidate input values.
 			if ( $id !== $parm ) {
-				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ) );
+				return new WP_Error( 'inconsistent_parms', __( 'Inconsistent data sent to Interface', 'wp-document-revisions' ), array( 'status' => 400 ) );
 			}
 			$guid = get_the_permalink( $id );
 			global $wpdb;
