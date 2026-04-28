@@ -14,6 +14,7 @@ features = docs.delete("./docs/features.md")
 docs.unshift(features)
 
 docs.each do |file|
+  next if File.directory?(file)
   next if exclude.include?(File.basename(file,".md"))
   output << "\n\n"
   output << File.open(file).read
