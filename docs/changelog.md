@@ -66,8 +66,15 @@ Numbers in brackets show the issue number in https://github.com/wp-document-revi
 * Sanitize attachment REST responses for non-editors: strip `source_url`, `guid`, `title`, `description`, `media_details`, and `link` fields to prevent leaking MD5-hashed filenames and file paths
 * Hide `document_attachment_id` meta from non-editors to prevent attachment enumeration
 * Strip WPDR internal content comment (`<!-- WPDR {ID} -->`) from revision REST responses
-* Validate attachment ownership (attachment must exist and be an `attachment` post type) before syncing meta to content
+* Validate attachment existence, post type, and parent ownership before syncing meta to content
 * Register attachment cleaning filters (`rest_prepare_attachment`, `rest_prepare_revision`) unconditionally, even when REST is not enabled for documents
+* Fix validate-structure REST permission callback to use `current_user_can()` instead of client-supplied user ID
+* Tighten Abilities API permission callbacks from `is_user_logged_in` to specific capabilities (`read_documents`, `read_document_revisions`)
+
+#### Security Improvements
+
+* Escape `display_name` and date values in document metabox via `esc_html`/`esc_attr`/`wp_kses` to prevent stored XSS
+* Wrap `get_sample_permalink_html()` output in `wp_kses_post()` before `wp_die()`
 
 #### REST API
 
