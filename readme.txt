@@ -366,6 +366,7 @@ Numbers in brackets show the issue number in https://github.com/wp-document-revi
 * Fix `WPDocumentRevisions` class not accessible outside IIFE scope
 * Fix `hasUpload` flag not persisting across ThickBox iframe reopens (mirror to parent window instance)
 * Fix `#postdivrich` CSS rule to properly hide editor content area in classic editor
+* Fix shortcode TypeError on PHP 8.x when called without attributes (WordPress passes empty string, not array)
 
 = # Upload Flow Enhancements =
 
@@ -419,7 +420,7 @@ Numbers in brackets show the issue number in https://github.com/wp-document-revi
 
 = # REST API =
 
-* Fix REST schema validation: use `WP_REST_Server::EDITABLE` constant, add status 400 to `WP_Error` returns
+* Fix REST schema validation: use `WP_REST_Server::EDITABLE` constant, add `type` and `validate_callback` to route args, add status 400 to `WP_Error` returns
 * Strip WPDR content comment from block editor REST responses
 * Populate `document_attachment_id` meta from content in REST edit context
 * Sync meta to content on REST document save
@@ -429,6 +430,7 @@ Numbers in brackets show the issue number in https://github.com/wp-document-revi
 * Add 5 Playwright E2E tests for upload flow enhancements
 * Add WP 6.4 and 5.9 to PHPUnit extended CI matrix
 * 370 Jest tests passing
+* Regenerate translation POT file with 247 updated strings
 
 = # Developer Improvements =
 
