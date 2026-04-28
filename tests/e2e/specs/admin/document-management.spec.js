@@ -63,7 +63,6 @@ test.describe( 'Document Management', () => {
 
 	test( 'can create a new document in the editor', async ( {
 		admin,
-		editor,
 		page,
 	} ) => {
 		await admin.createNewPost( {
@@ -71,10 +70,9 @@ test.describe( 'Document Management', () => {
 			title: 'E2E Test Document',
 		} );
 
-		// Verify the block editor loaded (enabled via mu-plugin for E2E tests).
-		const editorContent = editor.canvas.locator(
-			'.editor-styles-wrapper, [data-is-root-container]'
-		).first();
-		await expect( editorContent ).toBeVisible( { timeout: 10000 } );
+		// Verify the block editor loaded (canvas is hidden for documents via CSS,
+		// so check for the editor header toolbar instead).
+		const editorHeader = page.locator( '.edit-post-header' );
+		await expect( editorHeader ).toBeVisible( { timeout: 10000 } );
 	} );
 } );

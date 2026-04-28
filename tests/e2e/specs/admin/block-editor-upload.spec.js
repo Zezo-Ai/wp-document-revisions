@@ -52,11 +52,8 @@ test.describe( 'Block Editor Document Upload', () => {
 			title: 'Block Editor Upload Test',
 		} );
 
-		// Verify block editor loaded.
-		const editorContent = editor.canvas
-			.locator( '.editor-styles-wrapper, [data-is-root-container]' )
-			.first();
-		await expect( editorContent ).toBeVisible( { timeout: 15000 } );
+		// Wait for block editor to fully load (canvas is hidden for documents via CSS).
+		await page.waitForSelector( '.edit-post-header', { timeout: 15000 } );
 
 		const panel = await openDocumentUploadPanel( page, editor );
 
@@ -141,11 +138,8 @@ test.describe( 'Block Editor Document Upload', () => {
 			title: 'Block Editor Media Select Test',
 		} );
 
-		// Verify block editor loaded.
-		const editorContent = editor.canvas
-			.locator( '.editor-styles-wrapper, [data-is-root-container]' )
-			.first();
-		await expect( editorContent ).toBeVisible( { timeout: 15000 } );
+		// Wait for block editor to fully load (canvas is hidden for documents via CSS).
+		await page.waitForSelector( '.edit-post-header', { timeout: 15000 } );
 
 		// Open and expand the Document upload panel.
 		const panel = await openDocumentUploadPanel( page, editor );
@@ -210,10 +204,8 @@ test.describe( 'Block Editor Document Upload', () => {
 			title: 'Block Editor Save Test',
 		} );
 
-		const editorContent = editor.canvas
-			.locator( '.editor-styles-wrapper, [data-is-root-container]' )
-			.first();
-		await expect( editorContent ).toBeVisible( { timeout: 15000 } );
+		// Wait for block editor to fully load (canvas is hidden for documents via CSS).
+		await page.waitForSelector( '.edit-post-header', { timeout: 15000 } );
 
 		// Set the attachment meta directly via the editor data store.
 		// This mimics what happens when a file is selected via the sidebar panel.
