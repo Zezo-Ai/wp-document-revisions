@@ -171,7 +171,7 @@ class WP_Document_Revisions {
 		 *
 		 * @since 3.6
 		 *
-		 * @param string ''  helps define a more specific sub-directory for no direct file access.
+		 * @param string $pattern helps define a more specific sub-directory for no direct file access.
 		 */
 		if ( '' !== apply_filters( 'document_stop_file_access_pattern', '' ) ) {
 			add_action( 'generate_rewrite_rules', array( &$this, 'generate_rewrite_rules' ) );
@@ -399,7 +399,7 @@ class WP_Document_Revisions {
 		 *
 		 * @since 3.4
 		 *
-		 * @param boolean false default not to be in rest.
+		 * @param bool $show_in_rest default not to be in rest.
 		 */
 		if ( apply_filters( 'document_show_in_rest', false ) ) {
 			$args['show_in_rest'] = true;
@@ -412,7 +412,7 @@ class WP_Document_Revisions {
 		 *
 		 * @since 3.3
 		 *
-		 * @param boolean true  default action to capability read for documents (not read_document).
+		 * @param bool $read_uses_read default action to capability read for documents (not read_document).
 		 */
 		// user requires read_document and not just read to read document.
 		if ( ! apply_filters( 'document_read_uses_read', true ) ) {
@@ -722,7 +722,7 @@ class WP_Document_Revisions {
 		/**
 		 * Filter to switch off integration with Edit_Flow statuses.
 		 *
-		 * @param boolean true default value to use Edit_Flow processes if installed and active.
+		 * @param bool $use_edit_flow default value to use Edit_Flow processes if installed and active.
 		 */
 		if ( ! class_exists( 'EF_Custom_Status' ) || ! apply_filters( 'document_revisions_use_edit_flow', true ) ) {
 			return;
@@ -770,7 +770,7 @@ class WP_Document_Revisions {
 		/**
 		 * Filter to switch off integration with PublishPress statuses.
 		 *
-		 * @param boolean true default value to use PublishPress Statuses processes if installed and active.
+		 * @param bool $use_publishpress default value to use PublishPress Statuses processes if installed and active.
 		 */
 		if ( ! class_exists( 'PublishPress_Statuses' ) || ! apply_filters( 'document_revisions_use_edit_flow', true ) ) {
 			return;
@@ -810,7 +810,7 @@ class WP_Document_Revisions {
 		/**
 		 * Filter to switch off use of Edit_Flow statuses and taxonomy.
 		 *
-		 * @param boolean true default value to use Edit_Flow processes if installed and active. Normally internally used.
+		 * @param bool $use_workflow default value to use Edit_Flow processes if installed and active. Normally internally used.
 		 */
 		return apply_filters( 'document_use_workflow_states', true );
 	}

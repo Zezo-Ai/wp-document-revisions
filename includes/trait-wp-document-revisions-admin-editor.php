@@ -464,7 +464,7 @@ trait WP_Document_Revisions_Admin_Editor {
 				'postDesktopNotice'   => '<div id="message" class="update-nag"><p>' . __( 'After you have saved your document in your office software, <a href="#" onClick="location.reload();">reload this page</a> to see your changes.', 'wp-document-revisions' ) . '</p></div>',
 				'uploadConfirmation'  => __( 'New version uploaded. Press Update to save.', 'wp-document-revisions' ),
 				'uploadErrorNotice'   => '<div id="wpdr-upload-error" class="error"><p>' . __( 'Upload failed.', 'wp-document-revisions' ) . '</p></div>',
-				'saveFirstNotice'     => __( 'Please save the current version before uploading another.', 'wp-document-revisions' ),
+				'saveFirstNotice'     => '<div id="wpdr-save-first-notice" class="error"><p>' . __( 'Please save the current version before uploading another.', 'wp-document-revisions' ) . '</p></div>',
 				'uploadProgress'      => __( 'Uploading…', 'wp-document-revisions' ),
 				// translators: %s is the title of the document.
 				'lostLockNotice'      => __( 'Your lock on the document %s has been overridden. Any changes will be lost.', 'wp-document-revisions' ),
@@ -913,7 +913,7 @@ trait WP_Document_Revisions_Admin_Editor {
 	 * @param bool    $post_has_changed Whether the post has changed.
 	 * @param WP_Post $last_revision    The last revision post object.
 	 * @param WP_Post $post             The post object.
-	 * @return bool.
+	 * @return bool
 	 */
 	public function identify_last_but_one( bool $post_has_changed, WP_Post $last_revision, WP_Post $post ): bool {
 		// only interested if post changed.
@@ -950,7 +950,7 @@ trait WP_Document_Revisions_Admin_Editor {
 		 *
 		 * @since 3.4
 		 *
-		 * @param int 0 number of seconds between revisions to NOT create an extra revision.
+		 * @param int $merge_window number of seconds between revisions to NOT create an extra revision.
 		 */
 		if ( $time_diff < apply_filters( 'document_revisions_merge_revisions', 0 ) ) {
 			// only here as excerpt changed.

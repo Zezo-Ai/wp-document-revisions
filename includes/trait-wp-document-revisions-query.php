@@ -14,7 +14,7 @@ trait WP_Document_Revisions_Query {
 	 * Returns the.document attachment associated with a post.
 	 *
 	 * @param id $post_id ID of a post object (document or revision).
-	 * @return WP_Post||false
+	 * @return WP_Post|false
 	 */
 	public function get_document( $post_id ) {
 		$content   = get_post_field( 'post_content', $post_id );
@@ -369,7 +369,7 @@ trait WP_Document_Revisions_Query {
 		 *
 		 * @since 3.2.2
 		 *
-		 * @param int -1 (unlimited).
+		 * @param int $limit Number of revisions to keep (-1 for unlimited).
 		 */
 		$num = apply_filters( 'document_revisions_limit', $num );
 

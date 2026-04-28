@@ -452,7 +452,7 @@ trait WP_Document_Revisions_Revisions {
 		 *
 		 * @since 3.7
 		 *
-		 * @param boolean false  default to not allow deletion.
+		 * @param bool    $allow_deletion default to not allow deletion.
 		 * @param WP_Post $post  Post object.
 		 */
 		if ( apply_filters( 'document_allow_revision_deletion', false, $post ) ) {

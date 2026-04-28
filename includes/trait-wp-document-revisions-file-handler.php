@@ -119,7 +119,7 @@ trait WP_Document_Revisions_File_Handler {
 		 * I.e. return null if user not logged on and want to deny existence.
 		 * (only if filter 'document_read_uses_read' returns false)
 		 *
-		 * @param boolean true     default action to serve file.
+		 * @param bool   $serve_file default action to serve file.
 		 * @param object  $post    WP Post to be served.
 		 * @param string  $version Document revision.
 		 */
@@ -755,7 +755,7 @@ trait WP_Document_Revisions_File_Handler {
 	 * @since 3.3.1
 	 * @param String[] $headers Headers to outout.
 	 * @param string   $file    The file being served.
-	 * @return void.
+	 * @return void
 	 */
 	private function serve_headers( array $headers, string $file ): void {
 		/**
@@ -856,7 +856,7 @@ trait WP_Document_Revisions_File_Handler {
 	 * Filter the attached file for documents to obviate use of cached upload directory.
 	 *
 	 * @since 3.5.0
-	 * @param string/false $file          The file path to where the attached file should be.
+	 * @param string|false $file          The file path to where the attached file should be.
 	 * @param int          $attachment_id Attachment Id.
 	 * @return string path to document
 	 */
@@ -1092,7 +1092,7 @@ trait WP_Document_Revisions_File_Handler {
 		/**
 		 * Allows the RSS feed to be switched off.
 		 *
-		 * @param boolean true Allows an RSS feed for documents.
+		 * @param bool $enable_feed Allows an RSS feed for documents.
 		 */
 		if ( ! $this->verify_post_type() || ! apply_filters( 'document_verify_feed_key', true ) ) {
 			return;

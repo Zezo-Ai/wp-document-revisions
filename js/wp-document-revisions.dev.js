@@ -416,9 +416,8 @@
 				const post = wDoc.getElementById('post');
 				if (post) {
 					post.insertAdjacentHTML('beforebegin',
-						'<div id="wpdr-save-first-notice" class="error"><p>' +
-						(wp_document_revisions.saveFirstNotice || 'Please save the current version before uploading another.') +
-						'</p></div>');
+						wp_document_revisions.saveFirstNotice ||
+						'<div id="wpdr-save-first-notice" class="error"><p>Please save the current version before uploading another.</p></div>');
 				}
 				return;
 			}

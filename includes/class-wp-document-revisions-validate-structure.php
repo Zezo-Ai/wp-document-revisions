@@ -681,7 +681,7 @@ class WP_Document_Revisions_Validate_Structure {
 	 * @param id     $doc_id            ID of a post object.
 	 * @param string $attach_id         attachment id from post content field.
 	 * @param string $post_modified_gmt post modified field.
-	 * @return array||false
+	 * @return array|false
 	 */
 	private static function validate_document( $doc_id, $attach_id, string $post_modified_gmt ) {
 		global $wpdb;
@@ -756,7 +756,7 @@ class WP_Document_Revisions_Validate_Structure {
 	 * @param string $post_date   post date field.
 	 * @param string $post_name   post name field.
 	 * @param string $guid        post guid field.
-	 * @return array||false
+	 * @return array|false
 	 */
 	private static function validate_guid( $doc_id, $attach_id, string $post_status, string $post_date, string $post_name, string $guid ) {
 		$msg_09 = esc_html__( 'The guid is not the expected "ugly" permalink', 'wp-document-revisions' );
@@ -843,7 +843,7 @@ class WP_Document_Revisions_Validate_Structure {
 	 * @since 3.4.0
 	 *
 	 * @param id $doc_id ID of a post object.
-	 * @return int||false
+	 * @return int|false
 	 */
 	private static function get_last_attachment( $doc_id ) {
 		global $wpdb;
@@ -873,7 +873,7 @@ class WP_Document_Revisions_Validate_Structure {
 	 *
 	 * @param id     $attach_id id of an attachment post object.
 	 * @param string $doc_id    id of the document post object.
-	 * @return int||false
+	 * @return int|false
 	 */
 	private static function check_attachment( $attach_id, string $doc_id ) {
 		$attach = get_post( $attach_id );
@@ -932,7 +932,7 @@ class WP_Document_Revisions_Validate_Structure {
 		 * Filter to Switch off md5 format attachment validation.
 		 *
 		 * @since 3.6
-		 * @param boolean true.
+		 * @param bool $validate_md5 Whether to validate MD5 format.
 		 */
 		if ( apply_filters( 'document_validate_md5', true ) ) {
 			// check post_title (warning only).

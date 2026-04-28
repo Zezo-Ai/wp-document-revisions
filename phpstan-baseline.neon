@@ -109,24 +109,6 @@ parameters:
 			path: includes/class-wp-document-revisions-admin.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions-admin.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(int 0 number of seconds between revisions to NOT create an extra revision\.\)\: Unexpected token "0", expected variable at offset 383 on line 9$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions-admin.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(bool\.\)\: Unexpected token "\.", expected TOKEN_HORIZONTAL_WS at offset 282 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions-admin.php
-
-		-
 			message: '#^Parameter \#1 \$args of function wp_dropdown_users expects array\{show_option_all\?\: string, show_option_none\?\: string, option_none_value\?\: int\|string, hide_if_only_one_author\?\: string, orderby\?\: array\|string, order\?\: string, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, \.\.\.\}, array\{name\: ''author'', show_option_all\: string, value_field\: ''slug'', selected\: string\|false\|null, orderby\: ''name'', order\: ''ASC'', wpdr_added\: ''list'', has_published_posts\: array\{''document''\}\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -143,7 +125,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/class-wp-document-revisions-admin.php
-
 
 		-
 			message: '#^Parameter \$instance of method WP_Document_Revisions_Admin\:\:__construct\(\) has invalid type unknown\.$#'
@@ -163,7 +144,6 @@ parameters:
 			count: 3
 			path: includes/class-wp-document-revisions-front-end.php
 
-
 		-
 			message: '#^Parameter \#1 \$term of function get_term expects int\|object, string given\.$#'
 			identifier: argument.type
@@ -182,7 +162,6 @@ parameters:
 			count: 1
 			path: includes/class-wp-document-revisions-front-end.php
 
-
 		-
 			message: '#^Undefined variable\: \$document$#'
 			identifier: variable.undefined
@@ -200,8 +179,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/class-wp-document-revisions-front-end.php
-
-
 
 		-
 			message: '#^Method WP_Document_Revisions_Recently_Revised_Widget\:\:update\(\) should return array but returns ArrayAccess\.$#'
@@ -252,6 +229,12 @@ parameters:
 			path: includes/class-wp-document-revisions-recently-revised-widget.php
 
 		-
+			message: '#^Cannot access offset ''code'' on int\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/class-wp-document-revisions-validate-structure.php
+
+		-
 			message: '#^Expected 3 @param tags, found 2\.$#'
 			identifier: paramTag.count
 			count: 1
@@ -270,44 +253,68 @@ parameters:
 			path: includes/class-wp-document-revisions-validate-structure.php
 
 		-
+			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:check_attachment\(\) never returns int so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: includes/class-wp-document-revisions-validate-structure.php
+
+		-
+			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:check_attachment\(\) should return int\|false but returns array\{code\: 2, error\: 1, msg\: string, fix\: 0\}\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wp-document-revisions-validate-structure.php
+
+		-
+			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:check_attachment\(\) should return int\|false but returns array\{code\: 3, error\: 1, msg\: string, fix\: 0\}\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wp-document-revisions-validate-structure.php
+
+		-
+			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:check_attachment\(\) should return int\|false but returns array\{code\: 6, error\: 0, msg\: string, fix\: 1, parm\: id\}\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wp-document-revisions-validate-structure.php
+
+		-
+			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:check_attachment\(\) should return int\|false but returns array\{code\: 7, error\: 1, msg\: string, fix\: 1, parm\: id\}\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wp-document-revisions-validate-structure.php
+
+		-
+			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:check_attachment\(\) should return int\|false but returns array\{code\: 8, error\: 1, msg\: string, fix\: 0\}\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wp-document-revisions-validate-structure.php
+
+		-
 			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:correct_document\(\) should return WP_REST_Response but returns WP_Error\.$#'
 			identifier: return.type
 			count: 5
 			path: includes/class-wp-document-revisions-validate-structure.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
+			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:validate_guid\(\) never returns false so it can be removed from the return type\.$#'
+			identifier: return.unusedType
 			count: 1
 			path: includes/class-wp-document-revisions-validate-structure.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean true\.\)\: Unexpected token "true", expected variable at offset 105 on line 5$#'
-			identifier: phpDoc.parseError
+			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:validate_guid\(\) should return array\|false but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: includes/class-wp-document-revisions-validate-structure.php
+
+		-
+			message: '#^Method WP_Document_Revisions_Validate_Structure\:\:validate_guid\(\) should return array\|false but returns true\.$#'
+			identifier: return.type
 			count: 1
 			path: includes/class-wp-document-revisions-validate-structure.php
 
 		-
-			message: '#^PHPDoc tag @return has invalid value \(array\|\|false\)\: Unexpected token "\|", expected type at offset 273 on line 9$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions-validate-structure.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(array\|\|false\)\: Unexpected token "\|", expected type at offset 399 on line 12$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions-validate-structure.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(int\|\|false\)\: Unexpected token "\|", expected type at offset 126 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions-validate-structure.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(int\|\|false\)\: Unexpected token "\|", expected type at offset 235 on line 8$#'
-			identifier: phpDoc.parseError
+			message: '#^Parameter \#1 \$attach_id of static method WP_Document_Revisions_Validate_Structure\:\:check_attachment\(\) expects id, int\|string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: includes/class-wp-document-revisions-validate-structure.php
 
@@ -358,7 +365,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: includes/class-wp-document-revisions-validate-structure.php
-
 
 		-
 			message: '#^@param string \$user does not accept actual type of parameter\: int\<min, \-1\>\|int\<1, max\>\|false\.$#'
@@ -523,91 +529,6 @@ parameters:
 			path: includes/class-wp-document-revisions.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 10
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean false  default to not allow deletion\.\)\: Unexpected token "false", expected variable at offset 142 on line 6$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean false default not to be in rest\.\)\: Unexpected token "false", expected variable at offset 123 on line 6$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean true     default action to serve file\.\)\: Unexpected token "true", expected variable at offset 247 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean true  default action to capability read for documents \(not read_document\)\.\)\: Unexpected token "true", expected variable at offset 131 on line 6$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean true Allows an RSS feed for documents\.\)\: Unexpected token "true", expected variable at offset 74 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean true default value to use Edit_Flow processes if installed and active\. Normally internally used\.\)\: Unexpected token "true", expected variable at offset 95 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean true default value to use Edit_Flow processes if installed and active\.\)\: Unexpected token "true", expected variable at offset 92 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean true default value to use PublishPress Statuses processes if installed and active\.\)\: Unexpected token "true", expected variable at offset 95 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(int \-1 \(unlimited\)\.\)\: Unexpected token "\-1", expected variable at offset 288 on line 10$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(string ''''  helps define a more specific sub\-directory for no direct file access\.\)\: Unexpected token "''''", expected variable at offset 716 on line 17$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(string/false \$file          The file path to where the attached file should be\.\)\: Unexpected token "/false", expected variable at offset 128 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(WP_Post\|\|false\)\: Unexpected token "\|", expected type at offset 155 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(void\.\)\: Unexpected token "\.", expected TOKEN_HORIZONTAL_WS at offset 170 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wp-document-revisions.php
-
-		-
 			message: '#^Parameter \#1 \$documentish of method WP_Document_Revisions\:\:verify_post_type\(\) expects bool\|int\|object, string given\.$#'
 			identifier: argument.type
 			count: 3
@@ -697,7 +618,6 @@ parameters:
 			count: 1
 			path: includes/class-wp-document-revisions.php
 
-
 		-
 			message: '#^Strict comparison using \=\=\= between null and \*NEVER\* will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
@@ -727,9 +647,3 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/revision-feed.php
-
-		-
-			message: '#^PHPDoc tag @return has invalid value \(boolean\.\)\: Unexpected token "\.", expected TOKEN_HORIZONTAL_WS at offset 185 on line 8$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: wp-document-revisions.php
