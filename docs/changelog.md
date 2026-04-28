@@ -2,6 +2,12 @@
 
 Numbers in brackets show the issue number in https://github.com/wp-document-revisions/wp-document-revisions/issues/
 
+### 4.0.2
+
+#### Bug Fixes
+
+* Fix WordPress Playground `blueprint.json` path and schema for WordPress.org Live Preview
+
 ### 4.0.1
 
 #### Bug Fixes

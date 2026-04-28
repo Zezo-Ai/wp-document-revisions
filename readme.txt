@@ -5,7 +5,7 @@ Tags: documents, document management, version control, collaboration, revisions
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 4.0.1
+Stable tag: 4.0.2
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -213,6 +213,12 @@ Interested in translating WP Document Revisions? You can do so [via Crowdin](htt
 
 Numbers in brackets show the issue number in https://github.com/wp-document-revisions/wp-document-revisions/issues/
 
+= 4.0.2 =
+
+= # Bug Fixes =
+
+* Fix WordPress Playground `blueprint.json` path and schema for WordPress.org Live Preview
+
 = 4.0.1 =
 
 = # Bug Fixes =
@@ -224,103 +230,5 @@ Numbers in brackets show the issue number in https://github.com/wp-document-revi
 * Add WordPress Playground `blueprint.json` for live preview on WordPress.org
 
 = 4.0.0 =
-
-= # Block Editor Support (Experimental) =
-
-* Add experimental block editor (Gutenberg) support for documents, opt-in via `document_use_block_editor` and `document_show_in_rest` filters
-* Document sidebar panel with file upload, file type badge, download link, and save protection
-* Revision Summary textarea bound to post excerpt via `useEntityProp`
-* Lock status indicator using core editor lock with user name display
-* Upload success/error Snackbar notices matching WordPress patterns
-* Auto-close media modal after upload, matching classic editor ThickBox behavior
-* Revision Log sidebar panel fetching document history from REST API with auto-refresh on save
-* Hide main editor content canvas for documents (all management via sidebar panels)
-* `no_use_block_editor` now respects `document_use_block_editor` filter instead of unconditionally blocking Gutenberg
-* Conditionally add `excerpt` to document CPT supports when block editor is enabled
-* Pass document REST base slug to editor JS via `wp_add_inline_script`
-
-= # Bug Fixes =
-
-* Fix document upload on WordPress 6.9: handle JSON response from `async-upload.php` (previously expected numeric string)
-* Fix duplicate plupload `FileUploaded` bindings via `_uploaderBound` guard flag
-* Fix `WPDocumentRevisions` class not accessible outside IIFE scope
-* Fix `hasUpload` flag not persisting across ThickBox iframe reopens (mirror to parent window instance)
-* Fix `#postdivrich` CSS rule to properly hide editor content area in classic editor
-* Fix shortcode TypeError on PHP 8.x when called without attributes (WordPress passes empty string, not array)
-
-= # Upload Flow Enhancements =
-
-* Add upload error feedback with dismissible error notices
-* Add null document ID guard preventing errors on unsaved posts
-* Add upload progress indicator during file upload
-* Add save-first notice when uploading before saving current changes (localized as full HTML template)
-* Remove dead permalink regex that could never match
-* Add post-upload confirmation notice with metabox highlight
-
-= # Abilities API =
-
-* Adopt WordPress Abilities API (WP 6.9+) with document management category
-* Register 4 executable abilities: check-document-access, get-document-info, get-document-revisions, override-document-lock
-* Feature-gated with `function_exists()` for backward compatibility with WP < 6.9
-
-= # Plugin Lifecycle =
-
-* Add `uninstall.php` for clean plugin removal (options, user meta, 13 capabilities across 5 roles)
-* Add `deactivation_hook` for proper plugin lifecycle handling
-* Add `wpdr_db_version` option for tracking database schema version
-* Reconcile license to GPL-3.0-or-later across all files
-
-= # PHP Modernization =
-
-* Remove 144 instances of `array( &$this, 'method' )` pass-by-reference (PHP 8.x deprecation)
-* Remove 4 constructor `&$instance` pass-by-reference parameters
-* Replace 2 bare `die()` calls with `wp_die()` for proper shutdown hook execution
-* Migrate `wp_localize_script()` to `wp_add_inline_script()` with `wp_json_encode()`
-
-= # Code Quality =
-
-* Fix 24 PHPDoc parsing errors across 7 files (double pipes, trailing periods, filter @param syntax)
-* Reduce PHPStan baseline from 183 to 154 errors (zero phpDoc.parseError remaining)
-* Increase PHPStan parallel workers from 1 to 4
-
-= # REST API Security Hardening =
-
-* Sanitize attachment REST responses for non-editors: strip `source_url`, `guid`, `title`, `description`, `media_details`, and `link` fields to prevent leaking MD5-hashed filenames and file paths
-* Hide `document_attachment_id` meta from non-editors to prevent attachment enumeration
-* Strip WPDR internal content comment (`<!-- WPDR {ID} -->`) from revision REST responses
-* Validate attachment existence, post type, and parent ownership before syncing meta to content
-* Register attachment cleaning filters (`rest_prepare_attachment`, `rest_prepare_revision`) unconditionally, even when REST is not enabled for documents
-* Fix validate-structure REST permission callback to use `current_user_can()` instead of client-supplied user ID
-* Tighten Abilities API permission callbacks from `is_user_logged_in` to specific capabilities (`read_documents`, `read_document_revisions`)
-
-= # Security Improvements =
-
-* Escape `display_name` and date values in document metabox via `esc_html`/`esc_attr`/`wp_kses` to prevent stored XSS
-* Wrap `get_sample_permalink_html()` output in `wp_kses_post()` before `wp_die()`
-
-= # REST API =
-
-* Fix REST schema validation: use `WP_REST_Server::EDITABLE` constant, add `type` and `validate_callback` to route args, add status 400 to `WP_Error` returns
-* Strip WPDR content comment from block editor REST responses
-* Populate `document_attachment_id` meta from content in REST edit context
-* Sync meta to content on REST document save
-
-= # Testing =
-
-* Add 5 Playwright E2E tests for upload flow enhancements
-* Add WP 6.4 and 5.9 to PHPUnit extended CI matrix
-* 370 Jest tests passing
-* Regenerate translation POT file with 247 updated strings
-
-= # Developer Improvements =
-
-* Install 6 WordPress agent skills for Copilot (plugin dev, blocks, REST API, abilities, PHPStan, plugin directory)
-* Add comprehensive block editor documentation (`docs/block-editor.md`)
-* Update `docs/filters.md` with `document_use_block_editor` filter reference
-* Add block editor support to features list
-
-**Full Changelog**: https://github.com/wp-document-revisions/wp-document-revisions/compare/v3.9.0...v4.0.0
-
-= 3.9.0 =
 
 For complete changelog, see [GitHub](https://wp-document-revisions.github.io/wp-document-revisions/changelog/)
