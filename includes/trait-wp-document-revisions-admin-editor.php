@@ -824,8 +824,7 @@ trait WP_Document_Revisions_Admin_Editor {
 			<tbody>
 		<?php
 
-		$i              = 0;
-		$prev_attach_id = null;
+		$i = 0;
 		foreach ( $revisions as $revision ) {
 			++$i;
 			if ( ! current_user_can( 'read_document', $revision->ID ) ) {
@@ -835,13 +834,6 @@ trait WP_Document_Revisions_Admin_Editor {
 			// this will prevent mime/ext security conflicts in IE when downloading.
 			$attach = $this->get_document( $revision->ID );
 
-			// Skip consecutive revisions that reference the same document attachment
-			// (e.g., the initial revision created on first save of a new document).
-			$curr_attach_id = $attach ? $attach->ID : 0;
-			if ( null !== $prev_attach_id && $curr_attach_id === $prev_attach_id && $post->ID !== $revision->ID ) {
-				continue;
-			}
-			$prev_attach_id = $curr_attach_id;
 			if ( $attach ) {
 				$fn   = get_post_meta( $attach->ID, '_wp_attached_file', true );
 				$fno  = pathinfo( $fn, PATHINFO_EXTENSION );

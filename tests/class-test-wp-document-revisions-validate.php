@@ -722,11 +722,13 @@ class Test_WP_Document_Revisions_Validate extends Test_Common_WPDR {
 				self::assertEquals( 1, count( $route_config ), 'route_config too many rows' );
 				$route_parms = $route_config[0];
 
-				// check PUT method.
+				// check EDITABLE methods (PUT, PATCH, POST).
 				self::assertArrayHasKey( 'methods', $route_parms, 'methods element' );
 				self::assertTrue( is_array( $route_parms['methods'] ), 'no methods' );
-				self::assertEquals( 1, count( $route_parms['methods'] ), 'methods element too many rows' );
+				self::assertEquals( 3, count( $route_parms['methods'] ), 'methods element too many rows' );
 				self::assertArrayHasKey( 'PUT', $route_parms['methods'], 'methods PUT element' );
+				self::assertArrayHasKey( 'PATCH', $route_parms['methods'], 'methods PATCH element' );
+				self::assertArrayHasKey( 'POST', $route_parms['methods'], 'methods POST element' );
 
 				// check args properly defined.
 				self::assertArrayHasKey( 'args', $route_parms, 'arge element' );
