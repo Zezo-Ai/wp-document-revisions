@@ -100,6 +100,11 @@ class WP_Document_Revisions_Front_End {
 	 */
 	public function revisions_shortcode( $atts ): string {
 
+		// WordPress passes empty string when shortcode has no attributes.
+		if ( ! is_array( $atts ) ) {
+			$atts = array();
+		}
+
 		// change attribute number into numberposts (for backward compatibility).
 		if ( array_key_exists( 'number', $atts ) && ! array_key_exists( 'numberposts', $atts ) ) {
 			$atts['numberposts'] = $atts['number'];
@@ -193,6 +198,11 @@ class WP_Document_Revisions_Front_End {
 	 * @return string the shortcode output
 	 */
 	public function documents_shortcode( $atts ): string {
+
+		// WordPress passes empty string when shortcode has no attributes.
+		if ( ! is_array( $atts ) ) {
+			$atts = array();
+		}
 
 		// Only need to do something if workflow_state points to post_status.
 		if ( 'workflow_state' !== self::$parent->taxonomy_key() ) {
