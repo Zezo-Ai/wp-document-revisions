@@ -2,6 +2,13 @@
 
 Numbers in brackets show the issue number in https://github.com/wp-document-revisions/wp-document-revisions/issues/
 
+### 4.0.3
+
+#### Bug Fixes
+
+* Restore plugin banner image for WordPress.org plugin page
+* Add required `== Description ==` section header to readme.txt
+
 ### 4.0.2
 
 #### Bug Fixes

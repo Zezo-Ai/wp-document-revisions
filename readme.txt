@@ -5,7 +5,7 @@ Tags: documents, document management, version control, collaboration, revisions
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 4.0.2
+Stable tag: 4.0.3
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -215,6 +215,13 @@ Interested in translating WP Document Revisions? You can do so [via Crowdin](htt
 
 Numbers in brackets show the issue number in https://github.com/wp-document-revisions/wp-document-revisions/issues/
 
+= 4.0.3 =
+
+= # Bug Fixes =
+
+* Restore plugin banner image for WordPress.org plugin page
+* Add required `== Description ==` section header to readme.txt
+
 = 4.0.2 =
 
 = # Bug Fixes =
@@ -222,15 +229,5 @@ Numbers in brackets show the issue number in https://github.com/wp-document-revi
 * Fix WordPress Playground `blueprint.json` path and schema for WordPress.org Live Preview
 
 = 4.0.1 =
-
-= # Bug Fixes =
-
-* Fix shortcode TypeError on PHP 8.x when called without attributes
-* Fix E2E tests for hidden editor canvas on document post type
-* Fix REST route arg count assertions in test suite
-* Trim readme.txt description to fit WordPress.org 2,500 word limit
-* Add WordPress Playground `blueprint.json` for live preview on WordPress.org
-
-= 4.0.0 =
 
 For complete changelog, see [GitHub](https://wp-document-revisions.github.io/wp-document-revisions/changelog/)
