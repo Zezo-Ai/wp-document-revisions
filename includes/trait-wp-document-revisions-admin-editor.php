@@ -180,10 +180,18 @@ trait WP_Document_Revisions_Admin_Editor {
 			<em>
 			<?php
 			$mod_date = $latest_version->post_modified;
-			// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 			// translators: %1$s is the post modified date in words, %2$s is the post modified date in time format, %3$s is how long ago the post was modified, %4$s is the author's name.
-			printf( __( 'Checked in <abbr class="timestamp" title="%1$s" id="A%2$s">%3$s</abbr> ago by %4$s', 'wp-document-revisions' ), $mod_date, strtotime( $mod_date ), human_time_diff( (int) get_post_modified_time( 'U', true, $post->ID ), time() ), get_the_author_meta( 'display_name', $latest_version->post_author ) );
-			// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+			$checked_in = sprintf( __( 'Checked in <abbr class="timestamp" title="%1$s" id="A%2$s">%3$s</abbr> ago by %4$s', 'wp-document-revisions' ), esc_attr( $mod_date ), esc_attr( (string) strtotime( $mod_date ) ), esc_html( human_time_diff( (int) get_post_modified_time( 'U', true, $post->ID ), time() ) ), esc_html( get_the_author_meta( 'display_name', $latest_version->post_author ) ) );
+			echo wp_kses(
+				$checked_in,
+				array(
+					'abbr' => array(
+						'class' => array(),
+						'title' => array(),
+						'id'    => array(),
+					),
+				)
+			);
 			?>
 			</em>
 			</p>

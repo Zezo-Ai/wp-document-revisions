@@ -373,7 +373,7 @@ trait WP_Document_Revisions_Rewrites {
 		$this->clear_cache( $post_id, $doc, true );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput
-		wp_die( get_sample_permalink_html( $post_id, $title, $slug ) );
+		wp_die( wp_kses_post( get_sample_permalink_html( $post_id, $title, $slug ) ) );
 	}
 
 	/**

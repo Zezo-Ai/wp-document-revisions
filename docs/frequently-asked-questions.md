@@ -129,3 +129,15 @@ Yes. Download (and optionally customize) the [taxonomy permissions](https://gith
 ### Is it possible to do a bulk import of existing documents / files already on the server?
 
 Yes. It will need to be slightly customized to meet your needs, but take a look at the [Bulk Import Script](https://github.com/wp-document-revisions/wp-document-revisions-Code-Cookbook/blob/master/bulk-import.php) in the code cookbook.
+
+### Can I use the block editor (Gutenberg) with documents?
+
+Yes, but it is experimental and opt-in. By default, documents use the classic editor, which provides a streamlined, purpose-built upload interface. To enable the block editor, add both the `document_show_in_rest` and `document_use_block_editor` filters to your theme's `functions.php` or a custom plugin. See the [Block Editor Support](./block-editor.md) page for full details, including known limitations.
+
+### What happens when I delete (uninstall) the plugin?
+
+WP Document Revisions includes an `uninstall.php` that runs when the plugin is deleted from the WordPress admin. It removes plugin options (`document_upload_directory`, `document_slug`, `document_link_date`, `wpdr_db_version`), user meta (feed keys), and all 13 custom document capabilities from every role. Your uploaded document files and document posts are **not** deleted — only the plugin's settings and capabilities are cleaned up.
+
+### What is the Abilities API?
+
+Starting with WordPress 6.9, the plugin registers 4 document abilities (`check-document-access`, `get-document-info`, `get-document-revisions`, `override-document-lock`) via the WordPress Abilities API. These make document operations discoverable by REST clients, AI agents, and the WordPress command palette. The abilities are feature-gated and only registered when WordPress 6.9+ is detected.

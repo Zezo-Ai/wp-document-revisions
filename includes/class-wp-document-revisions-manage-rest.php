@@ -333,6 +333,11 @@ class WP_Document_Revisions_Manage_Rest {
 				return $prepared_post;
 			}
 
+			// Verify the attachment belongs to this document.
+			if ( ! empty( $prepared_post->ID ) && (int) $attachment->post_parent !== (int) $prepared_post->ID ) {
+				return $prepared_post;
+			}
+
 			$wpdr    = self::$parent;
 			$content = isset( $prepared_post->post_content ) ? $prepared_post->post_content : '';
 			// Strip any existing WPDR comment to avoid duplicates.

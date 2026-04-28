@@ -87,6 +87,10 @@ See [**the full list of features**](https://wp-document-revisions.github.io/wp-d
 - Multiple language support including French, Spanish and German (easily translated to your language)
 - Integration with [Edit Flow](https://editflow.org), PublishPress or PublishPress Statuses.
 - Opt-in [Block Editor (Gutenberg) support](https://wp-document-revisions.github.io/wp-document-revisions/block-editor/) with document sidebar panel (experimental)
+- REST API security hardening: attachment data sanitized for non-editors, attachment ownership validation
+- WordPress Abilities API integration (WP 6.9+) for AI agents and the command palette
+- Clean uninstall: options, user meta, and capabilities removed on plugin deletion
+- Deactivation hook flushes rewrite rules for clean deactivation
 - Recently Revised Documents Widget, shortcodes, and templating functions for front-end integration
 
 = Features Available via the [Code Cookbook](https://github.com/wp-document-revisions/wp-document-revisions-Code-Cookbook) =
@@ -123,7 +127,7 @@ See [**the full list of features**](https://wp-document-revisions.github.io/wp-d
 
 - [Edit Flow](https://wordpress.org/plugins/edit-flow/)
 - [PublishPress Statuses](https://wordpress.org/plugins/publishpress-statuses/)
-- [PublishPress Revisions](https://wp-document-revisions.github.io/wp-document-revisions/https://wordpress.org/plugins/publishpress-revisions/) - See the [integration guide](cookbook/publishpress-revisions-integration/) for scheduling document revisions
+- [PublishPress Revisions](https://wordpress.org/plugins/publishpress-revisions/) - See the [integration guide](cookbook/publishpress-revisions-integration/) for scheduling document revisions
 
 
 === Block Editor (Gutenberg) Support — Experimental ===
@@ -298,7 +302,7 @@ composer install --no-dev
 
 = ⚙️ Requirements =
 
-- **WordPress:** 4.9 or higher
+- **WordPress:** 5.0 or higher
 - **PHP:** 7.4 or higher
 - **File Permissions:** WordPress must be able to write to the uploads directory
 
@@ -397,10 +401,19 @@ Numbers in brackets show the issue number in https://github.com/wp-document-revi
 * Reduce PHPStan baseline from 183 to 154 errors (zero phpDoc.parseError remaining)
 * Increase PHPStan parallel workers from 1 to 4
 
+= # REST API Security Hardening =
+
+* Sanitize attachment REST responses for non-editors: strip `source_url`, `guid`, `title`, `description`, `media_details`, and `link` fields to prevent leaking MD5-hashed filenames and file paths
+* Hide `document_attachment_id` meta from non-editors to prevent attachment enumeration
+* Strip WPDR internal content comment (`<!-- WPDR {ID} -->`) from revision REST responses
+* Validate attachment ownership (attachment must exist and be an `attachment` post type) before syncing meta to content
+* Register attachment cleaning filters (`rest_prepare_attachment`, `rest_prepare_revision`) unconditionally, even when REST is not enabled for documents
+
 = # REST API =
 
 * Fix REST schema validation: use `WP_REST_Server::EDITABLE` constant, add status 400 to `WP_Error` returns
 * Strip WPDR content comment from block editor REST responses
+* Strip WPDR content comment from revision REST responses
 * Populate `document_attachment_id` meta from content in REST edit context
 * Sync meta to content on REST document save
 

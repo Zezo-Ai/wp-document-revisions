@@ -34,6 +34,10 @@
 - Multiple language support including French, Spanish and German (easily translated to your language)
 - Integration with [Edit Flow](https://editflow.org), PublishPress or PublishPress Statuses.
 - Opt-in [Block Editor (Gutenberg) support](block-editor.md) with document sidebar panel (experimental)
+- REST API security hardening: attachment data sanitized for non-editors, attachment ownership validation
+- WordPress Abilities API integration (WP 6.9+) for AI agents and the command palette
+- Clean uninstall: options, user meta, and capabilities removed on plugin deletion
+- Deactivation hook flushes rewrite rules for clean deactivation
 - Recently Revised Documents Widget, shortcodes, and templating functions for front-end integration
 
 ### Features Available via the [Code Cookbook](https://github.com/wp-document-revisions/wp-document-revisions-Code-Cookbook)

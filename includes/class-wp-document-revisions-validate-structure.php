@@ -462,12 +462,11 @@ class WP_Document_Revisions_Validate_Structure {
 	 * @return boolean
 	 */
 	public function check_permission( WP_REST_Request $request ): bool {
-		// userid must be passed and able to edit the document.
 		$params = $request->get_params();
-		if ( ! isset( $params['userid'] ) ) {
+		if ( ! isset( $params['id'] ) ) {
 			return false;
 		}
-		return user_can( $params['userid'], 'edit_document', $params['id'] );
+		return current_user_can( 'edit_document', $params['id'] );
 	}
 
 	/**

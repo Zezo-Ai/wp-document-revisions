@@ -368,7 +368,9 @@ class WP_Document_Revisions {
 				'description'         => __( 'Retrieve metadata for a document including file type, revision count, and lock status.', 'wp-document-revisions' ),
 				'category'            => 'wp-document-revisions',
 				'execute_callback'    => array( $this, 'ability_get_document_info' ),
-				'permission_callback' => 'is_user_logged_in',
+				'permission_callback' => function () {
+					return current_user_can( 'read_documents' );
+				},
 				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(
@@ -400,7 +402,9 @@ class WP_Document_Revisions {
 				'description'         => __( 'Retrieve the revision history of a document.', 'wp-document-revisions' ),
 				'category'            => 'wp-document-revisions',
 				'execute_callback'    => array( $this, 'ability_get_document_revisions' ),
-				'permission_callback' => 'is_user_logged_in',
+				'permission_callback' => function () {
+					return current_user_can( 'read_document_revisions' );
+				},
 				'input_schema'        => array(
 					'type'       => 'object',
 					'properties' => array(

@@ -26,7 +26,7 @@ composer install --no-dev
 
 ### ⚙️ Requirements
 
-- **WordPress:** 4.9 or higher
+- **WordPress:** 5.0 or higher
 - **PHP:** 7.4 or higher
 - **File Permissions:** WordPress must be able to write to the uploads directory
 
