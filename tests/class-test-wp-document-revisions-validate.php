@@ -737,21 +737,25 @@ class Test_WP_Document_Revisions_Validate extends Test_Common_WPDR {
 				// id.
 				self::assertArrayHasKey( 'id', $route_parms['args'], 'args id element' );
 				self::assertTrue( is_array( $route_parms['args']['id'] ), 'no args id' );
-				self::assertEquals( 2, count( $route_parms['args']['id'] ), 'args id element too many rows' );
+				self::assertEquals( 3, count( $route_parms['args']['id'] ), 'args id element too many rows' );
+				self::assertArrayHasKey( 'type', $route_parms['args']['id'], 'args id type element' );
 				self::assertArrayHasKey( 'required', $route_parms['args']['id'], 'args id required element' );
 				self::assertArrayHasKey( 'sanitize_callback', $route_parms['args']['id'], 'args id sanitize element' );
 				self::assertEquals( 'absint', $route_parms['args']['id']['sanitize_callback'], 'args id sanitize value' );
 				// code.
 				self::assertArrayHasKey( 'code', $route_parms['args'], 'args code element' );
 				self::assertTrue( is_array( $route_parms['args']['code'] ), 'no args code' );
-				self::assertEquals( 2, count( $route_parms['args']['code'] ), 'args code element too many rows' );
+				self::assertEquals( 4, count( $route_parms['args']['code'] ), 'args code element too many rows' );
+				self::assertArrayHasKey( 'type', $route_parms['args']['code'], 'args code type element' );
 				self::assertArrayHasKey( 'required', $route_parms['args']['code'], 'args code required element' );
 				self::assertArrayHasKey( 'sanitize_callback', $route_parms['args']['code'], 'args code sanitize element' );
 				self::assertEquals( 'absint', $route_parms['args']['code']['sanitize_callback'], 'args code sanitize value' );
+				self::assertArrayHasKey( 'validate_callback', $route_parms['args']['code'], 'args code validate element' );
 				// parm.
 				self::assertArrayHasKey( 'parm', $route_parms['args'], 'args parm element' );
 				self::assertTrue( is_array( $route_parms['args']['parm'] ), 'no args parm' );
-				self::assertEquals( 2, count( $route_parms['args']['parm'] ), 'args parm element too many rows' );
+				self::assertEquals( 3, count( $route_parms['args']['parm'] ), 'args parm element too many rows' );
+				self::assertArrayHasKey( 'type', $route_parms['args']['parm'], 'args parm type element' );
 				self::assertArrayHasKey( 'required', $route_parms['args']['parm'], 'args parm required element' );
 				self::assertArrayHasKey( 'sanitize_callback', $route_parms['args']['parm'], 'args parm sanitize element' );
 				self::assertEquals( 'absint', $route_parms['args']['parm']['sanitize_callback'], 'args parm sanitize value' );
