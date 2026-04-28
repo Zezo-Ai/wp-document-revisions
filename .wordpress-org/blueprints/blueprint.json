@@ -4,12 +4,18 @@
 		"php": "8.0",
 		"wp": "latest"
 	},
+	"features": {
+		"networking": true
+	},
 	"steps": [
 		{
 			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org",
+			"pluginZipFile": {
+				"resource": "wordpress.org/plugins",
 				"slug": "wp-document-revisions"
+			},
+			"options": {
+				"activate": true
 			}
 		},
 		{
