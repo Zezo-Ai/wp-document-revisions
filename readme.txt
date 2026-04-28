@@ -5,7 +5,7 @@ Tags: documents, document management, version control, collaboration, revisions
 Requires at least: 5.0
 Requires PHP: 7.4
 Tested up to: 6.9
-Stable tag: 3.9.0
+Stable tag: 4.0.0
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -234,6 +234,38 @@ Interested in translating WP Document Revisions? You can do so [via Crowdin](htt
 == Changelog ==
 
 Numbers in brackets show the issue number in https://github.com/wp-document-revisions/wp-document-revisions/issues/
+
+= 4.0.0 =
+
+== Block Editor Support (Experimental) ==
+
+* Experimental block editor (Gutenberg) support for documents via opt-in filters
+* Document sidebar panel: file upload, type badge, download link, revision summary, lock status
+* Auto-close media modal after upload, matching classic editor behavior
+* Revision Log sidebar panel with document history and auto-refresh on save
+
+== Bug Fixes ==
+
+* Fix document upload on WordPress 6.9 (JSON response handling, plupload binding, scope fixes)
+* Fix hasUpload flag persistence across ThickBox reopens
+
+== New Features ==
+
+* WordPress Abilities API integration (WP 6.9+) with 4 document management abilities
+* Plugin uninstall handler for clean removal
+* Upload flow enhancements: error feedback, progress indicator, save-first notice
+
+== PHP Modernization ==
+
+* Remove 144 pass-by-reference instances (PHP 8.x deprecation fix)
+* Replace bare die() with wp_die(), migrate wp_localize_script to wp_add_inline_script
+
+== Code Quality ==
+
+* Fix 24 PHPDoc parsing errors, reduce PHPStan baseline from 183 to 154 errors
+* Reconcile license to GPL-3.0-or-later, add deactivation hook
+
+**Full Changelog**: https://github.com/wp-document-revisions/wp-document-revisions/compare/v3.9.0...v4.0.0
 
 = 3.9.0 =
 
