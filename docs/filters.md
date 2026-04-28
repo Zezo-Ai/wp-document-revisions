@@ -203,7 +203,7 @@ Filters the show_in_rest parameter from its default value of false. Must be set 
 
 In: class-wp-document-revisions.php
 
-Filters whether to enable block editor (Gutenberg) support for documents. Default is false. When set to true, enables REST API write methods, registers post meta for REST, and adds excerpt support to the document post type. Must be used together with `document_show_in_rest` and `use_block_editor_for_post` filters. See [Block Editor Support](block-editor.md).
+Filters whether to enable experimental block editor (Gutenberg) support for documents. Default is false. When set to true, enables REST API write methods, registers post meta for REST, adds excerpt support to the document post type, and hides the main editor canvas. Must be used together with `document_show_in_rest` filter. See [Block Editor Support](block-editor.md).
 
 ## Filter document_slug
 

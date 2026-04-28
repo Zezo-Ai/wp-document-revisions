@@ -1,26 +1,31 @@
-# Block Editor (Gutenberg) Support
+# Block Editor (Gutenberg) Support — Experimental
 
-WP Document Revisions includes opt-in support for the WordPress block editor (Gutenberg). By default, documents use the classic editor, which provides a streamlined upload-focused interface. The block editor can be enabled when you need full Gutenberg capabilities alongside document management.
+> **⚠️ Experimental Feature:** Block editor support for documents is experimental and opt-in. The classic editor remains the default, recommended, and most thoroughly tested interface. Enable the block editor only if you want to evaluate the new experience and are comfortable with potential rough edges. Please [report any issues](https://github.com/wp-document-revisions/wp-document-revisions/issues) you encounter.
 
-## Enabling the Block Editor
+WP Document Revisions includes experimental support for the WordPress block editor (Gutenberg). By default, documents use the classic editor, which provides a streamlined, purpose-built upload interface. The block editor can be enabled for evaluation when you want to try the newer WordPress editing experience for documents.
 
-Add the following filters to your theme's `functions.php` or a custom plugin:
+## How to Opt In
+
+Add the following two filters to your theme's `functions.php` or a custom plugin:
 
 ```php
 // Enable REST API for documents (required for block editor).
 add_filter( 'document_show_in_rest', '__return_true' );
 
-// Enable the block editor for documents.
+// Enable the experimental block editor for documents.
 add_filter( 'document_use_block_editor', '__return_true' );
 ```
 
-Alternatively, you can create a [must-use plugin](https://developer.wordpress.org/advanced-administration/plugins/mu-plugins/) at `wp-content/mu-plugins/enable-block-editor.php`:
+Alternatively, create a [must-use plugin](https://developer.wordpress.org/advanced-administration/plugins/mu-plugins/) at `wp-content/mu-plugins/enable-block-editor.php`:
 
 ```php
 <?php
+// Experimental: Enable block editor for documents.
 add_filter( 'document_show_in_rest', '__return_true' );
 add_filter( 'document_use_block_editor', '__return_true' );
 ```
+
+To disable the block editor, simply remove these filters.
 
 Both filters are required. `document_show_in_rest` exposes documents to the REST API, and `document_use_block_editor` configures the plugin for block editor compatibility (enables Gutenberg for documents, allows REST write methods, adds excerpt support, and registers post meta).
 
@@ -85,8 +90,10 @@ WP Document Revisions also provides three Gutenberg blocks for displaying docume
 - **Recently Revised Documents** (`wp-document-revisions/documents-widget`) — Shows recently updated documents, equivalent to the sidebar widget
 - **Document Revisions** (`wp-document-revisions/revisions-shortcode`) — Shows the revision history for a specific document, equivalent to the `[document_revisions]` shortcode
 
-## Considerations
+## Known Limitations
 
-- The block editor experience is opt-in and considered stable, but the classic editor remains the default and most thoroughly tested interface
-- Document locking in the block editor uses WordPress core's lock mechanism, which differs from the plugin's custom `document_lock_check` filter used in the classic editor
-- The block editor requires the REST API to be enabled for documents, which exposes document endpoints to authenticated users with appropriate capabilities
+- **Experimental** — This feature is under active development and may have rough edges
+- **Document locking** — Uses WordPress core's lock mechanism, which differs from the plugin's custom `document_lock_check` filter used in the classic editor
+- **REST API exposure** — Requires the REST API to be enabled for documents, which exposes document endpoints to authenticated users with appropriate capabilities
+- **Content area hidden** — The main editor canvas is hidden since documents don't use post body content; all management happens via the sidebar panels
+- **Revision restore** — The Revision Log panel displays history but does not yet support restoring previous revisions (use the classic editor for that)
