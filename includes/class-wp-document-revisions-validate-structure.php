@@ -268,10 +268,12 @@ class WP_Document_Revisions_Validate_Structure {
 				$content = $wpdr->format_doc_id( $parm );
 			} else {
 				// find if there is a document id there.
-				preg_match( '/(<!-- WPDR \s*\d+ -->)/', $content, $id );
-				if ( isset( $id[1] ) ) {
-					// if a match return the id.
-					$content = str_replace( $id[1], '', $content );
+				// Use a separate match-output variable; reusing $id here previously overwrote the post-id and corrupted unrelated posts.
+				$matches = array();
+				preg_match( '/(<!-- WPDR \s*\d+ -->)/', $content, $matches );
+				if ( isset( $matches[1] ) ) {
+					// if a match strip the existing marker before re-prefixing.
+					$content = str_replace( $matches[1], '', $content );
 				}
 				$content = $wpdr->format_doc_id( $parm ) . $content;
 			}

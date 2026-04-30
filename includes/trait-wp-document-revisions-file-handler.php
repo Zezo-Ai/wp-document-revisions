@@ -167,8 +167,10 @@ trait WP_Document_Revisions_File_Handler {
 		status_header( 200 );
 
 		// fake the filename.
-		$filename  = $post->post_name;
-		$filename .= ( '' === $version ) ? '' : __( '-revision-', 'wp-document-revisions' ) . $version;
+		// Coerce the revision query var to a non-negative integer to prevent header-parameter tampering via the Content-Disposition filename.
+		$version_label = absint( $version );
+		$filename      = $post->post_name;
+		$filename     .= ( 0 === $version_label ) ? '' : __( '-revision-', 'wp-document-revisions' ) . $version_label;
 
 		// we want the true attachment URL, not the permalink, so temporarily remove our filter.
 		remove_filter( 'wp_get_attachment_url', array( $this, 'attachment_url_filter' ) );
@@ -714,8 +716,9 @@ trait WP_Document_Revisions_File_Handler {
 		// lookup key and, if found, set user_id (so current_user_can will work).
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$feed_user = $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = %s AND meta_value = %s", $wpdb->prefix . self::$meta_key, $key ) );
-		if ( '' !== $feed_user ) {
-			wp_set_current_user( $feed_user );
+		// $wpdb->get_var() returns NULL when no row matches; only authenticate when an actual user_id is found.
+		if ( ! empty( $feed_user ) && is_numeric( $feed_user ) ) {
+			wp_set_current_user( (int) $feed_user );
 			return true;
 		}
 
