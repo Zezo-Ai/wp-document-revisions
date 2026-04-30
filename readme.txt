@@ -5,7 +5,7 @@ Tags: documents, document management, version control, collaboration, revisions
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 4.0.3
+Stable tag: 4.0.4
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -214,6 +214,15 @@ Interested in translating WP Document Revisions? You can do so [via Crowdin](htt
 == Changelog ==
 
 Numbers in brackets show the issue number in https://github.com/wp-document-revisions/wp-document-revisions/issues/
+
+= 4.0.4 =
+
+= # Security =
+
+* Fix authentication bypass in revision feed key validation (`validate_feed_key()`) where `$wpdb->get_var()` returning NULL was treated as a successful match.
+* Fix variable shadowing in validate-structure REST `correct_document()` (code 4) that could overwrite the `post_content` of an unrelated post.
+* Add per-document capability checks to Abilities API endpoints `override-document-lock` and `get-document-revisions`.
+* Sanitize the `revision` query var (`absint()`) before concatenation into the `Content-Disposition` filename header in `serve_file()`.
 
 = 4.0.3 =
 

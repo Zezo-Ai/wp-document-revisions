@@ -41,7 +41,7 @@ class WP_Document_Revisions {
 	 *
 	 * @var string
 	 */
-	public $version = '4.0.3';
+	public $version = '4.0.4';
 
 	/**
 	 * The WP default upload directory cache.
